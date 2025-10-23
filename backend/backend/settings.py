@@ -64,6 +64,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'backend.urls'
+AUTH_USER_MODEL = 'accounts.User'
 
 REST_FRAMEWORK = { 
     'DEFAULT_AUTHENTICATION_CLASSES': ( 
