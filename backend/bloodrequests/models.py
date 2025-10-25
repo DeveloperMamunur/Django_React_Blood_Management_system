@@ -75,14 +75,26 @@ class BloodRequest(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.location:
-            if self.requester_type == 'RECEIVER':
-                receiver_profile = getattr(self.requested_by, 'receiver_profile', None)
-                if receiver_profile and receiver_profile.location:
-                    self.location = receiver_profile.location
-            elif self.requester_type == 'HOSPITAL':
+            if self.requester_type == 'HOSPITAL':
                 hospital_profile = getattr(self.requested_by, 'hospital_profile', None)
                 if hospital_profile and hospital_profile.location:
                     self.location = hospital_profile.location
+
+            elif self.requester_type == 'RECEIVER':
+                if self.hospital:
+                    if self.hospital.location:
+                        self.location = self.hospital.location
+                else:
+                    if not self.hospital_name:
+                        raise ValidationError("Provide either a registered hospital or a hospital name.")
+                    new_location = Location.objects.create(
+                        address_line1=f"Unknown address for {self.hospital_name}",
+                        city="Unknown",
+                        state="Unknown",
+                        postal_code="0000",
+                        country="Bangladesh"
+                    )
+                    self.location = new_location
 
         if self.hospital and not self.hospital_name:
             self.hospital_name = self.hospital.hospital_name

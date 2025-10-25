@@ -2,39 +2,44 @@ from rest_framework import serializers
 from donors.models import DonorProfile, DonationRecord
 from accounts.serializers import UserSerializer
 from locations.serializers import LocationSerializer
+from accounts.models import User
+from locations.models import Location
 
 
 class DonorProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    user = UserSerializer(read_only=True)
     location = LocationSerializer(required=False, allow_null=True)
 
     class Meta:
         model = DonorProfile
         fields = '__all__'
+        read_only_fields = ['user', 'total_donations', 'donation_points', 'is_verified', 'verified_at', 'verified_by']
 
     def create(self, validated_data):
-        user_data = validated_data.pop('user')
-        location_data = validated_data.pop('location', None)
+        request = self.context.get('request')
+        user = request.user if request and request.user.is_authenticated else None
 
-        user = UserSerializer().create(user_data)
+        location_data = validated_data.pop('location', None)
         location = None
         if location_data:
-            location = LocationSerializer().create(location_data)
+            location = Location.objects.create(**location_data)
 
-        donor = DonorProfile.objects.create(user=user, location=location, **validated_data)
+        donor, created = DonorProfile.objects.update_or_create(
+            user=user,
+            defaults={**validated_data, 'location': location}
+        )
         return donor
 
     def update(self, instance, validated_data):
-        user_data = validated_data.pop('user', None)
         location_data = validated_data.pop('location', None)
 
-        if user_data:
-            UserSerializer().update(instance.user, user_data)
         if location_data:
             if instance.location:
-                LocationSerializer().update(instance.location, location_data)
+                for attr, value in location_data.items():
+                    setattr(instance.location, attr, value)
+                instance.location.save()
             else:
-                instance.location = LocationSerializer().create(location_data)
+                instance.location = Location.objects.create(**location_data)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -49,3 +54,10 @@ class DonationRecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = DonationRecord
         fields = '__all__'
+        read_only_fields = ['donor', 'collected_by']
+
+    def create(self, validated_data):
+        collected_by = self.context['request'].user if self.context['request'].user.is_authenticated else None
+        validated_data['collected_by'] = collected_by
+        return super().create(validated_data)
+

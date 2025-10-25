@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+from decimal import Decimal
 from django.utils import timezone
 from accounts.models import User
 from locations.models import Location
@@ -28,8 +29,9 @@ class DonorProfile(models.Model):
     date_of_birth = models.DateField()
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     weight = models.DecimalField(
-        max_digits=5, decimal_places=2,
-        validators=[MinValueValidator(45.0)],
+        max_digits=5,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('45.00'))],
         help_text="Weight in kg (minimum 45kg)"
     )
     last_donation_date = models.DateField(null=True, blank=True)

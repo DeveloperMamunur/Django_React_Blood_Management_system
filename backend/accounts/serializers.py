@@ -2,8 +2,12 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import ReceiverProfile, HospitalProfile
+from .models import ReceiverProfile, HospitalProfile, AdminProfile
+from locations.models import Location
 from locations.serializers import LocationSerializer
+from analytics.models import ActivityLog
+from django.utils import timezone
+import os
 
 User = get_user_model()
 
@@ -30,8 +34,31 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user = User(**validated_data)
         user.set_password(password)
         user.save()
+
+        request = self.context.get('request')
+        ip = None
+        user_agent = ''
+        if request:
+            ip = self.get_client_ip(request)
+            user_agent = request.META.get('HTTP_USER_AGENT', '')
+
+        ActivityLog.objects.create(
+            user=user,
+            action='USER_REGISTERED',
+            description=f"New user '{user.username}' registered with role '{user.role}'.",
+            ip_address=ip,
+            user_agent=user_agent,
+            metadata={
+                "email": user.email,
+                "role": user.role,
+                "timestamp": timezone.now().isoformat()
+            }
+        )
         return user
 
+    def get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        return x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
 
 # -----------------------------
 # JWT Login Serializer
@@ -76,10 +103,54 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 # -----------------------------
+# Admin Profile Serializer
+# -----------------------------
+class AdminProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    location = LocationSerializer(required=False, allow_null=True)
+
+    class Meta:
+        model = AdminProfile
+        fields = '__all__'
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        user = request.user if request else None
+
+        location_data = validated_data.pop('location', None)
+        location = None
+        if location_data:
+            location = Location.objects.create(**location_data)
+
+        profile, created = AdminProfile.objects.update_or_create(
+            user=user,
+            defaults={**validated_data, 'location': location}
+        )
+        return profile
+
+    def update(self, instance, validated_data):
+        location_data = validated_data.pop('location', None)
+
+        if location_data:
+            if instance.location:
+                for attr, value in location_data.items():
+                    setattr(instance.location, attr, value)
+                instance.location.save()
+            else:
+                instance.location = Location.objects.create(**location_data)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
+
+
+# -----------------------------
 # Receiver Profile Serializer
 # -----------------------------
 class ReceiverProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    user = UserSerializer(read_only=True)
     location = LocationSerializer(required=False, allow_null=True)
 
     class Meta:
@@ -87,24 +158,30 @@ class ReceiverProfileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        user_data = validated_data.pop('user')
-        location_data = validated_data.pop('location', None)
+        request = self.context.get('request')
+        user = request.user if request else None
 
-        user = UserSerializer().create(user_data)
-        location = LocationSerializer().create(location_data) if location_data else None
-        return ReceiverProfile.objects.create(user=user, location=location, **validated_data)
+        location_data = validated_data.pop('location', None)
+        location = None
+        if location_data:
+            location = Location.objects.create(**location_data)
+
+        profile, created = ReceiverProfile.objects.update_or_create(
+            user=user,
+            defaults={**validated_data, 'location': location}
+        )
+        return profile
 
     def update(self, instance, validated_data):
-        user_data = validated_data.pop('user', None)
         location_data = validated_data.pop('location', None)
 
-        if user_data:
-            UserSerializer().update(instance.user, user_data)
         if location_data:
             if instance.location:
-                LocationSerializer().update(instance.location, location_data)
+                for attr, value in location_data.items():
+                    setattr(instance.location, attr, value)
+                instance.location.save()
             else:
-                instance.location = LocationSerializer().create(location_data)
+                instance.location = Location.objects.create(**location_data)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -118,7 +195,7 @@ class ReceiverProfileSerializer(serializers.ModelSerializer):
 # Hospital Profile Serializer
 # -----------------------------
 class HospitalProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    user = UserSerializer(read_only=True)
     location = LocationSerializer(required=False, allow_null=True)
 
     class Meta:
@@ -126,25 +203,36 @@ class HospitalProfileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        user_data = validated_data.pop('user')
+        request = self.context.get('request')
+        user = request.user if request else None
+
         location_data = validated_data.pop('location', None)
+        location = None
+        if location_data:
+            location = Location.objects.create(**location_data)
 
-        user = UserSerializer().create(user_data)
-        location = LocationSerializer().create(location_data) if location_data else None
-
-        return HospitalProfile.objects.create(user=user, location=location, **validated_data)
+        profile, created = HospitalProfile.objects.update_or_create(
+            user=user,
+            defaults={**validated_data, 'location': location}
+        )
+        return profile
 
     def update(self, instance, validated_data):
-        user_data = validated_data.pop('user', None)
         location_data = validated_data.pop('location', None)
+        new_file = validated_data.get('license_document', None)
 
-        if user_data:
-            UserSerializer().update(instance.user, user_data)
+        if new_file and instance.license_document:
+            old_path = instance.license_document.path
+            if os.path.exists(old_path):
+                os.remove(old_path)
+
         if location_data:
             if instance.location:
-                LocationSerializer().update(instance.location, location_data)
+                for attr, value in location_data.items():
+                    setattr(instance.location, attr, value)
+                instance.location.save()
             else:
-                instance.location = LocationSerializer().create(location_data)
+                instance.location = Location.objects.create(**location_data)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)

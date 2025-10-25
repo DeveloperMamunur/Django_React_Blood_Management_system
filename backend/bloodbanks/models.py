@@ -11,7 +11,7 @@ class BloodBank(models.Model):
     email = models.EmailField()
     operating_hours = models.CharField(max_length=100, default="24/7")
     storage_capacity = models.PositiveIntegerField(help_text="Maximum units that can be stored")
-    managed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='managed_blood_banks')
+    managed_by = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name='managed_blood_banks')
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'bloodbanks',
     'campaigns',
     'notifications',
-    'analytics',
+    'analytics.apps.AnalyticsConfig',
     'locations',
     'bloodrequests',
 ]

@@ -35,6 +35,38 @@ class User(AbstractUser):
         return f"{self.username} ({self.get_role_display()})"
 
 
+class AdminProfile(models.Model):
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name='admin_profile'
+    )
+    full_name = models.CharField(max_length=255)
+    age = models.PositiveIntegerField()
+    blood_group = models.CharField(
+        max_length=3,
+        choices=(
+            ('A+', 'A+'), ('A-', 'A-'),
+            ('B+', 'B+'), ('B-', 'B-'),
+            ('AB+', 'AB+'), ('AB-', 'AB-'),
+            ('O+', 'O+'), ('O-', 'O-'),
+        )
+    )
+    location = models.ForeignKey(
+        Location, on_delete=models.SET_NULL, null=True, related_name='admins'
+    )
+    contact_number = models.CharField(max_length=17, blank=True)
+    emergency_contact = models.CharField(max_length=17, blank=True)
+    notes = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'admin_profiles'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.full_name} ({self.user.username})"
+
 class ReceiverProfile(models.Model):
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name='receiver_profile'
@@ -62,9 +94,10 @@ class ReceiverProfile(models.Model):
 
     class Meta:
         db_table = 'receiver_profiles'
+        ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.full_name} ({self.blood_group})"
+        return f"{self.full_name} ({self.user.username})"
 
 
 class HospitalProfile(models.Model):

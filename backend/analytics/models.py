@@ -26,6 +26,9 @@ class DonationStatistics(models.Model):
 class ActivityLog(models.Model):
     ACTION_CHOICES = (
         ('USER_REGISTERED', 'User Registered'),
+        ('USER_LOGIN', 'User Login'),
+        ('USER_LOGOUT', 'User Logout'),
+        ('USER_LOGIN_FAILED', 'User Login Failed'),
         ('DONOR_VERIFIED', 'Donor Verified'),
         ('REQUEST_CREATED', 'Request Created'),
         ('REQUEST_APPROVED', 'Request Approved'),
@@ -38,7 +41,7 @@ class ActivityLog(models.Model):
     action = models.CharField(max_length=50, choices=ACTION_CHOICES)
     description = models.TextField()
     ip_address = models.GenericIPAddressField(null=True, blank=True)
-    user_agent = models.TextField(blank=True)
+    user_agent = models.CharField(max_length=255, null=True, blank=True)
     metadata = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
