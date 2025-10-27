@@ -10,35 +10,32 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const initUser = async () => {
-        setIsAuthLoading(true);
-        const token = localStorage.getItem('access_token');
-        if (token) {
-            const user = await authService.getCurrentUser();
-            setCurrentUser(user); 
-        }
-        setIsAuthLoading(false);
+      setIsAuthLoading(true);
+      const token = localStorage.getItem("access_token");
+      if (token) {
+        const user = await authService.getCurrentUser();
+        setCurrentUser(user);
+      }
+      setIsAuthLoading(false);
     };
 
     initUser();
   }, []);
 
   const login = async (credentials) => {
-  try {
-    const response = await authService.login(credentials);
-    localStorage.setItem("access_token", response.token);
-    localStorage.setItem("refresh_token", response.refresh);
-    const user = await authService.getCurrentUser();
-    setCurrentUser(user);
-    flushSync(() => {
+    try {
+      const response = await authService.login(credentials);
+      localStorage.setItem("access_token", response.token);
+      localStorage.setItem("refresh_token", response.refresh);
+      const user = await authService.getCurrentUser();
       setCurrentUser(user);
-    });
-    
-    return { success: true, user };
-  } catch (err) {
-    setError(err.message || "Login failed");
-    throw err;
-  }
-};
+      return { success: true, user };
+    } catch (err) {
+      const errorMessage = err.message || "Login failed";
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  };
 
   const register = async (userData) => {
     try {
@@ -46,16 +43,11 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("access_token", response.token);
       localStorage.setItem("refresh_token", response.refresh);
       const user = await authService.getCurrentUser();
-      setCurrentUser(user);
-      flushSync(() => {
-        setCurrentUser(user);
-      });
-      
+      flushSync(() => setCurrentUser(user));
       return { success: true, user };
-      // return response;
     } catch (err) {
       setError(err.message || "Registration failed");
-      throw err;
+      return { success: false, error: err.message || "Registration failed" };
     }
   };
 
@@ -71,7 +63,7 @@ export const AuthProvider = ({ children }) => {
       setCurrentUser(user);
       return user;
     } catch (err) {
-      console.error('Failed to refresh user', err);
+      console.error("Failed to refresh user", err);
     }
   };
 
@@ -86,6 +78,7 @@ export const AuthProvider = ({ children }) => {
         refreshCurrentUser,
         isAuthLoading,
         error,
+        setError,
       }}
     >
       {children}

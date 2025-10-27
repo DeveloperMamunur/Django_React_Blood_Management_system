@@ -40,23 +40,29 @@ class UserLoginView(TokenObtainPairView):
     serializer_class = UserLoginSerializer
 
     def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
+        try:
+            response = super().post(request, *args, **kwargs)
 
-        # If login successful
-        if response.status_code == 200:
-            user = self.get_user(request)
-            if user:
-                ActivityLog.objects.create(
-                    user=user,
-                    action="USER_LOGIN",
-                    description=f"User '{user.username}' logged in successfully.",
-                    ip_address=self.get_client_ip(request),
-                    user_agent=request.META.get('HTTP_USER_AGENT', ''),
-                    metadata={
-                        "timestamp": timezone.now().isoformat(),
-                    }
-                )
-        return response
+            # If login successful
+            if response.status_code == 200:
+                user = self.get_user(request)
+                if user:
+                    ActivityLog.objects.create(
+                        user=user,
+                        action="USER_LOGIN",
+                        description=f"User '{user.username}' logged in successfully.",
+                        ip_address=self.get_client_ip(request),
+                        user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                        metadata={
+                            "timestamp": timezone.now().isoformat(),
+                        }
+                    )
+            return response
+        except Exception as e:
+            return Response(
+                {"detail": "The password or username does not match"}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
 
     def get_user(self, request):
         serializer = self.get_serializer(data=request.data)

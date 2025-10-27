@@ -16,11 +16,15 @@ export const authService = {
             }
         }
         } catch (error) {
-            throw new Error(
+            const errorMessage = 
                 error.response?.data?.error ||
                 error.response?.data?.detail ||
-                'Login failed'
-            );
+                error.response?.data?.message ||
+                error.response?.data?.non_field_errors?.[0] ||
+                (error.response?.status === 401 ? 'The password or username does not match' : null) ||
+                'Login failed. Please try again.';
+            
+            throw new Error(errorMessage);
         }
     },
 
