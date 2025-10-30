@@ -1,6 +1,7 @@
 from rest_framework import generics, permissions
 from donors.models import DonorProfile, DonationRecord
 from donors.serializers import DonorProfileSerializer, DonationRecordSerializer
+from rest_framework.exceptions import NotFound
 
 class DonorProfileListCreateView(generics.ListCreateAPIView):
     serializer_class = DonorProfileSerializer
@@ -13,7 +14,8 @@ class DonorProfileListCreateView(generics.ListCreateAPIView):
         return DonorProfile.objects.filter(user=user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        donor_profile = getattr(self.request.user, 'donor_profile', None)
+        serializer.save(donor=donor_profile)
 
 class DonorProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = DonorProfile.objects.all()
@@ -28,6 +30,38 @@ class DonorProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
             return user.donor_profile
         except DonorProfile.DoesNotExist:
             raise NotFound("Donor profile not found for this user.")
+
+class CurrentDonorProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = DonorProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        user = self.request.user
+        donor_profile, created = DonorProfile.objects.get_or_create(
+            user=user,
+            defaults={
+                "date_of_birth": "1900-01-01",
+                "blood_group": "",
+                "gender": "M",
+                "weight": 0.0,
+                "last_donation_date": None,
+                "medical_conditions": "",
+                "is_available": True,
+                "location": None,
+                "profile_photo": None,
+                "bio": "",
+                "willing_to_travel_km": 10,
+                "preferred_donation_time": "ANYTIME",
+                "total_donations": 0,
+                "donation_points": 0,
+                "is_verified": False,
+                "verified_at": None,
+                "verified_by": None,
+                "created_at": None,
+                "updated_at": None,
+            }
+        )
+        return donor_profile
 
 
 class DonationRecordListCreateView(generics.ListCreateAPIView):

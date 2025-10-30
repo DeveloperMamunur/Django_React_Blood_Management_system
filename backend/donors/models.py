@@ -26,7 +26,7 @@ class DonorProfile(models.Model):
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='donor_profile')
     blood_group = models.CharField(max_length=3, choices=BLOOD_GROUP_CHOICES)
-    date_of_birth = models.DateField()
+    date_of_birth = models.DateField(null=False, blank=False, default='1900-01-01')
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     weight = models.DecimalField(
         max_digits=5,

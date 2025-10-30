@@ -32,7 +32,6 @@ class DonorProfileSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         location_data = validated_data.pop('location', None)
-
         if location_data:
             if instance.location:
                 for attr, value in location_data.items():
@@ -41,9 +40,18 @@ class DonorProfileSerializer(serializers.ModelSerializer):
             else:
                 instance.location = Location.objects.create(**location_data)
 
+        request = self.context.get('request')
+        user_data = request.data.get('user') if request else None
+        if user_data:
+            for attr in ['first_name', 'last_name', 'phone_number']:
+                if attr in user_data:
+                    setattr(instance.user, attr, user_data[attr])
+            instance.user.save()
+
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
+
         return instance
 
 

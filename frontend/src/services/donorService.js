@@ -62,4 +62,8 @@ export const donorService = {
       return null;
     }
   },
+  async currentDonor() {
+    const response = await api.get("/donors/current-profile/");
+    return response.data;
+  },
 };

@@ -1,4 +1,5 @@
 from django.db import models
+from geopy.geocoders import Nominatim
 
 class Location(models.Model):
     address_line1 = models.CharField(max_length=255)
@@ -34,3 +35,13 @@ class Location(models.Model):
             parts.append(self.address_line2)
         parts.extend([self.city, self.state, self.postal_code, self.country])
         return ", ".join(parts)
+
+    def save(self, *args, **kwargs):
+        if not self.latitude or not self.longitude:
+            geolocator = Nominatim(user_agent="my_app")
+            full_address = self.get_full_address()
+            location = geolocator.geocode(full_address)
+            if location:
+                self.latitude = location.latitude
+                self.longitude = location.longitude
+        super().save(*args, **kwargs)

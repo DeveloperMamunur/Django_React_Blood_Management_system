@@ -23,6 +23,7 @@ import RequestPage from "./pages/backend/RequestPage.jsx";
 import CampaignPage from "./pages/backend/CampaignPage.jsx";
 import ReportPage from "./pages/backend/ReportPage.jsx";
 import BloodInventoryPage from "./pages/backend/BloodInventoryPage.jsx";
+import DonorProfilePage from "./pages/backend/profiles/DonorProfilePage.jsx";
 
 function App() {
   return (
@@ -59,6 +60,7 @@ function App() {
                   <Route path="/requests" element={<RequestPage />} />
                   <Route path="/campaigns" element={<CampaignPage />} />
                   <Route path="/reports" element={<ReportPage />} />
+                  <Route path="/donor/profile" element={<DonorProfilePage />} />
                   
                 </Route>
               </Route>

@@ -1,11 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { useDarkMode } from "../../hooks/useDarkMode";
 import { Users, Calendar, Search, Bell, Menu, Moon, Sun, LayoutDashboard, Package, FileText, BarChart3, LogOut, Settings, User } from 'lucide-react';
+import { Link } from "react-router-dom";
 import { useSidebar } from "../../hooks/useSidebar";
+import { useAuth } from "../../hooks/useAuth";
 
 let currentPage = 'dashboard';
 
 export default function TopBar() {
+    const { currentUser, logout } = useAuth();
     const { darkMode, toggleDarkMode } = useDarkMode();
     const { toggleSidebar } = useSidebar();
     const [showNotifications, setShowNotifications] = useState(false);
@@ -20,6 +23,14 @@ export default function TopBar() {
         { id: 3, title: 'Inventory alert', message: 'A+ blood stock is low', time: '2 hours ago', unread: false },
         { id: 4, title: 'New donor registered', message: 'Jane Smith registered as donor', time: '1 day ago', unread: false },
     ];
+
+    const profiles = [
+        {role: 'DONOR', link: '/donor/profile' },
+        {role: 'ADMIN', link: '/admin/profile' },
+        {role: 'RECEIVER', link: '/receiver/profile' },
+        {role: 'HOSPITAL', link: '/hospital/profile' },
+        {role: 'BLOOD_BANK', link: '/bloodbank/profile' },
+    ]
 
     // Close dropdowns when clicking outside
     useEffect(() => {
@@ -133,19 +144,27 @@ export default function TopBar() {
                         {showProfile && (
                             <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2">
                                 <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                                    <p className="text-sm font-semibold text-gray-900 dark:text-white">Admin User</p>
-                                    <p className="text-xs text-gray-600 dark:text-gray-400">admin@bloodbank.com</p>
+                                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{currentUser.name}</p>
+                                    <p className="text-xs text-gray-600 dark:text-gray-400">{currentUser.email}</p>
                                 </div>
-                                <button className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-3">
-                                    <User className="h-4 w-4" />
-                                    <span>My Profile</span>
-                                </button>
+                                {profiles
+                                    .filter((p) => p.role === currentUser?.role)
+                                    .map((item) => (
+                                        <Link
+                                        key={item.role}
+                                        to={item.link}
+                                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-3"
+                                        >
+                                        <User className="h-4 w-4" />
+                                        <span>My Profile</span>
+                                        </Link>
+                                    ))}
                                 <button className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-3">
                                     <Settings className="h-4 w-4" />
                                     <span>Settings</span>
                                 </button>
                                 <div className="border-t border-gray-200 dark:border-gray-700 mt-2 pt-2">
-                                    <button className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-3">
+                                    <button onClick={logout} className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-3">
                                         <LogOut className="h-4 w-4" />
                                         <span>Logout</span>
                                     </button>
