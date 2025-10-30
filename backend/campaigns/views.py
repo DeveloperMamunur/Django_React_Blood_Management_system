@@ -13,7 +13,13 @@ class BloodDriveCampaignListCreateView(generics.ListCreateAPIView):
         serializer.save(organizer=self.request.user)
 
     def get_queryset(self):
-        return self.queryset.filter(organizer=self.request.user)
+        user = self.request.user
+        queryset = BloodDriveCampaign.objects.all()
+
+        if user.role != 'ADMIN' or user.is_superuser:
+            queryset = queryset.filter(organizer=user)
+
+        return queryset
 
 class BloodDriveCampaignDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = BloodDriveCampaign.objects.all()

@@ -25,7 +25,7 @@ class BloodRequestListCreateView(generics.ListCreateAPIView):
         if location_id:
             queryset = queryset.filter(location_id=location_id)
 
-        if user.role != 'ADMIN':
+        if user.role != 'ADMIN' or user.is_superuser:
             queryset = queryset.filter(requested_by=user)
 
         return queryset
@@ -39,7 +39,7 @@ class BloodRequestDetailView(generics.RetrieveUpdateDestroyAPIView):
         user = self.request.user
         queryset = BloodRequest.objects.all()
 
-        if user.role != 'ADMIN':
+        if user.role != 'ADMIN' or user.is_superuser:
             queryset = queryset.filter(requested_by=user)
 
         return queryset

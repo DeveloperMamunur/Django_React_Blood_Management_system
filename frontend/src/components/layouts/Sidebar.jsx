@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Heart,
   Users,
@@ -8,30 +7,39 @@ import {
   LayoutDashboard,
   Package,
   FileText,
+  HeartHandshake,
   BarChart3,
   LogOut,
+  Hospital,
+  Droplet,
+  UserRound,
+  Megaphone,
 } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import { useSidebar } from "../../hooks/useSidebar";
 import { useAuth } from "../../hooks/useAuth";
 
 export default function Sidebar() {
-  const [currentPage, setCurrentPage] = useState("dashboard");
+  const location = useLocation();
+  const currentPage = location.pathname.split('/')[1] || 'dashboard';
   const { sidebarOpen, closeSidebar } = useSidebar();
   const { logout } = useAuth();
 
   const navItems = [
     { id: "dashboard", name: "Dashboard", icon: LayoutDashboard },
-    { id: "inventory", name: "Inventory", icon: Package },
-    { id: "donors", name: "Donors", icon: Users },
+    { id: "users", name: "Users", icon: Users },
+    { id: "donors", name: "Donors", icon: HeartHandshake },
+    { id: "hospitals", name: "Hospitals", icon: Hospital },
+    { id: "blood-banks", name: "Blood Banks", icon: Droplet },
+    { id: "receivers", name: "Receivers", icon: UserRound },
     { id: "requests", name: "Requests", icon: FileText },
-    { id: "appointments", name: "Appointments", icon: Calendar },
+    { id: "campaigns", name: "Campaigns", icon: Megaphone },
     { id: "reports", name: "Reports", icon: BarChart3 },
   ];
 
   const handleLogout = () => {
     logout();
   };
-
 
   return (
     <>
@@ -65,9 +73,9 @@ export default function Sidebar() {
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
-              <button
+              <Link
                 key={item.id}
-                onClick={() => setCurrentPage(item.id)}
+                to={`/${item.id}`}
                 className={`w-full flex items-center ${
                   sidebarOpen ? "px-4 justify-start" : "px-0 justify-center"
                 } py-3 rounded-lg transition-all duration-300 ${
@@ -84,7 +92,7 @@ export default function Sidebar() {
                 >
                   {item.name}
                 </span>
-              </button>
+              </Link>
             );
           })}
         </nav>
@@ -152,12 +160,10 @@ export default function Sidebar() {
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
-              <button
+              <Link
                 key={item.id}
-                onClick={() => {
-                  setCurrentPage(item.id);
-                  closeSidebar();
-                }}
+                to={`/${item.id}`}
+                onClick={closeSidebar}
                 className={`w-full flex items-center px-4 py-3 rounded-lg transition-all duration-300 ${
                   currentPage === item.id
                     ? "bg-red-600 text-white shadow-lg"
@@ -166,7 +172,7 @@ export default function Sidebar() {
               >
                 <Icon className="h-5 w-5" />
                 <span className="ml-3 font-medium">{item.name}</span>
-              </button>
+              </Link>
             );
           })}
         </nav>
@@ -176,7 +182,10 @@ export default function Sidebar() {
             <Settings className="h-5 w-5" />
             <span className="ml-3 font-medium">Settings</span>
           </button>
-          <button className="w-full flex items-center px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
             <LogOut className="h-5 w-5" />
             <span className="ml-3 font-medium">Logout</span>
           </button>

@@ -37,3 +37,8 @@ class RequestViewStatisticsListCreateView(generics.ListCreateAPIView):
     queryset = RequestViewStatistics.objects.all()
     serializer_class = RequestViewStatisticsSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        if not self.request.user.is_superuser and not self.request.user.role == 'ADMIN':
+            return RequestViewStatistics.objects.filter(user=self.request.user).order_by('-created_at')
+        return RequestViewStatistics.objects.all().order_by('-created_at')

@@ -15,18 +15,18 @@ class BloodInventorySerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         request = self.context.get('request')
+        bank_pk = self.context.get('view').kwargs.get('bank_pk')
         user = request.user if request else None
 
-        blood_bank = BloodBank.objects.filter(managed_by=user).first()
+        blood_bank = BloodBank.objects.filter(id=bank_pk, managed_by=user).first()
         if not blood_bank:
-            raise serializers.ValidationError("No blood bank is associated with this user.")
+            raise serializers.ValidationError("You are not authorized to modify this blood bank.")
 
         inventory, created = BloodInventory.objects.update_or_create(
             blood_bank=blood_bank,
             blood_group=validated_data.get('blood_group'),
             defaults=validated_data,
         )
-
         return inventory
 
 

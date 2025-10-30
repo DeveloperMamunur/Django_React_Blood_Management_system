@@ -154,6 +154,7 @@ class AdminProfileListCreateView(generics.ListCreateAPIView):
 
 
 class AdminProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = AdminProfile.objects.all()
     serializer_class = AdminProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -172,7 +173,7 @@ class ReceiverProfileListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'ADMIN':
+        if user.is_superuser or user.role == 'ADMIN':
             return ReceiverProfile.objects.all()
         return ReceiverProfile.objects.filter(user=user)
 
@@ -184,11 +185,12 @@ class ReceiverProfileListCreateView(generics.ListCreateAPIView):
 
 
 class ReceiverProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ReceiverProfile.objects.all()
     serializer_class = ReceiverProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
-        if self.request.is_superuser or self.request.user.role == 'ADMIN':
+        if self.request.user.is_superuser or self.request.user.role == 'ADMIN':
             return self.get_queryset().get(pk=self.kwargs['pk'])
         return self.request.user.receiver_profile
 
@@ -213,6 +215,7 @@ class HospitalProfileListCreateView(generics.ListCreateAPIView):
 
 
 class HospitalProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = HospitalProfile.objects.all()
     serializer_class = HospitalProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 

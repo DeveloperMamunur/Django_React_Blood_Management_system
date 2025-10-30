@@ -23,6 +23,7 @@ class BloodBankListCreateView(generics.ListCreateAPIView):
 
 
 class BloodBankDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = BloodBank.objects.all()
     serializer_class = BloodBankSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -43,10 +44,13 @@ class BloodInventoryListCreateView(generics.ListCreateAPIView):
 
 
     def get_queryset(self):
+        bank_pk = self.kwargs.get('bank_pk')
         user = self.request.user
+        qs = BloodInventory.objects.filter(blood_bank_id=bank_pk)
+
         if user.is_superuser or user.role == 'ADMIN':
-            return BloodInventory.objects.all()
-        return BloodInventory.objects.filter(blood_bank__managed_by=user)
+            return qs
+        return qs.filter(blood_bank__managed_by=user)
 
 
 class BloodInventoryDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -55,7 +59,8 @@ class BloodInventoryDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_update(self, serializer):
-        serializer.save(blood_bank=self.request.user.managed_blood_banks)
+        blood_bank = BloodBank.objects.filter(managed_by=self.request.user).first()
+        serializer.save(blood_bank=blood_bank)
         inventory_updated_signal.send(
             sender=self.__class__,
             request=self.request,
@@ -63,7 +68,9 @@ class BloodInventoryDetailView(generics.RetrieveUpdateDestroyAPIView):
         )
 
     def get_queryset(self):
+        bank_pk = self.kwargs.get('bank_pk')
         user = self.request.user
+        qs = BloodInventory.objects.filter(blood_bank_id=bank_pk)
         if user.is_superuser or user.role == 'ADMIN':
-            return BloodInventory.objects.all()
-        return BloodInventory.objects.filter(blood_bank__managed_by=user)
+            return qs
+        return qs.filter(blood_bank__managed_by=user)

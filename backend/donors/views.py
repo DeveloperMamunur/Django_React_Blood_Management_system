@@ -16,6 +16,7 @@ class DonorProfileListCreateView(generics.ListCreateAPIView):
         serializer.save(user=self.request.user)
 
 class DonorProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = DonorProfile.objects.all()
     serializer_class = DonorProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
