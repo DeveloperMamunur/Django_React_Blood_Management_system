@@ -131,6 +131,7 @@ export default function Register() {
                   <option value="DONOR">Donor</option>
                   <option value="RECEIVER">Receiver</option>
                   <option value="HOSPITAL">Hospital</option>
+                  <option value="BLOOD_BANK">Blood Bank</option>
                 </select>
               </div>
             </div>

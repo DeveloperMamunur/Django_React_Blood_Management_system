@@ -42,6 +42,17 @@ export const hospitalService = {
         } catch (error) {
             console.log(error);
         }
-    }
+    },
+
+    async currentHospital () {
+        try {
+            const response = await api.get('/hospitals/current-profile/');
+            console.log(response.data);
+            
+            return response.data;    
+        } catch (error) {
+            console.log(error);
+        }
+    },
 
 };

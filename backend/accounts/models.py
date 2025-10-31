@@ -39,7 +39,6 @@ class AdminProfile(models.Model):
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name='admin_profile'
     )
-    full_name = models.CharField(max_length=255)
     age = models.PositiveIntegerField()
     blood_group = models.CharField(
         max_length=3,
@@ -71,7 +70,6 @@ class ReceiverProfile(models.Model):
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name='receiver_profile'
     )
-    full_name = models.CharField(max_length=255)
     age = models.PositiveIntegerField()
     blood_group = models.CharField(
         max_length=3,
@@ -114,7 +112,7 @@ class HospitalProfile(models.Model):
     )
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
     emergency_contact = models.CharField(max_length=17)
-    website = models.URLField(blank=True)
+    website = models.URLField(blank=True, null=True)
     has_blood_bank = models.BooleanField(default=False)
     bed_capacity = models.PositiveIntegerField(null=True, blank=True)
     is_verified = models.BooleanField(default=False)

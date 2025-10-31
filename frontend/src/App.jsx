@@ -24,6 +24,9 @@ import CampaignPage from "./pages/backend/CampaignPage.jsx";
 import ReportPage from "./pages/backend/ReportPage.jsx";
 import BloodInventoryPage from "./pages/backend/BloodInventoryPage.jsx";
 import DonorProfilePage from "./pages/backend/profiles/DonorProfilePage.jsx";
+import ReceiverProfilePage from "./pages/backend/profiles/ReceiverProfilePage.jsx";
+import HospitalProfilePage from "./pages/backend/profiles/HospitalProfilePage.jsx";
+import BloodBankProfilePage from "./pages/backend/profiles/BloodBankProfilePage.jsx";
 
 function App() {
   return (
@@ -61,6 +64,9 @@ function App() {
                   <Route path="/campaigns" element={<CampaignPage />} />
                   <Route path="/reports" element={<ReportPage />} />
                   <Route path="/donor/profile" element={<DonorProfilePage />} />
+                  <Route path="/receiver/profile" element={<ReceiverProfilePage />} />
+                  <Route path="/hospital/profile" element={<HospitalProfilePage />} />
+                  <Route path="/bloodbank/profile" element={<BloodBankProfilePage />} />
                   
                 </Route>
               </Route>

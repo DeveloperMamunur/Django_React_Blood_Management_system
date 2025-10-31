@@ -9,6 +9,7 @@ from .models import HospitalProfile, ReceiverProfile, AdminProfile
 from donors.models import DonorProfile
 from analytics.models import ActivityLog 
 from django.utils import timezone
+from rest_framework.exceptions import NotFound
 
 from accounts.serializers import (
     UserSerializer,
@@ -171,6 +172,10 @@ class ReceiverProfileListCreateView(generics.ListCreateAPIView):
     serializer_class = ReceiverProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def perform_create(self, serializer):
+        receiver_profile = getattr(self.request.user, 'receiver_profile', None)
+        serializer.save(receiver=receiver_profile)
+
     def get_queryset(self):
         user = self.request.user
         if user.is_superuser or user.role == 'ADMIN':
@@ -194,6 +199,26 @@ class ReceiverProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
             return self.get_queryset().get(pk=self.kwargs['pk'])
         return self.request.user.receiver_profile
 
+class CurrentReceiverProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = ReceiverProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        user = self.request.user
+        receiver_profile, created = ReceiverProfile.objects.get_or_create(
+            user=user,
+            defaults={
+                "age": 0,
+                "blood_group": "",
+                "contact_number": "",
+                "emergency_contact": "",
+                "notes": "",
+                "location": None,
+                "created_at": None,
+                "updated_at": None,
+            },
+        )
+        return receiver_profile
 # -----------------------------
 # Hospital Profiles
 # -----------------------------
@@ -201,6 +226,10 @@ class HospitalProfileListCreateView(generics.ListCreateAPIView):
     queryset = HospitalProfile.objects.all()
     serializer_class = HospitalProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        hospital_profile = getattr(self.request.user, 'hospital_profile', None)
+        serializer.save(hospital=hospital_profile)
 
     def get_queryset(self):
         user = self.request.user
@@ -227,6 +256,30 @@ class HospitalProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
             return user.hospital_profile
         except HospitalProfile.DoesNotExist:
             raise NotFound("Hospital profile not found for this user.")
+
+class CurrentHospitalProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = HospitalProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        user = self.request.user
+        hospital_profile, created = HospitalProfile.objects.get_or_create(
+            user=user,
+            defaults={
+                "hospital_name": "",
+                "registration_number": "",
+                "hospital_type": "",
+                "emergency_contact": "",
+                "website": "",
+                "has_blood_bank": False,
+                "bed_capacity": None,
+                "is_verified": False,
+                "license_document": None,
+                "created_at": None,
+                "updated_at": None,
+            },
+        )
+        return hospital_profile
 
 # -----------------------------
 # Nearby Donors

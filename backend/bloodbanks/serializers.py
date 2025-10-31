@@ -67,6 +67,7 @@ class BloodBankSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         location_data = validated_data.pop("location", None)
+        managed_by_data = self.context['request'].data.get('managed_by')
 
         if location_data:
             if instance.location:
@@ -75,6 +76,13 @@ class BloodBankSerializer(serializers.ModelSerializer):
                 instance.location.save()
             else:
                 instance.location = Location.objects.create(**location_data)
+
+        if managed_by_data:
+            user = instance.managed_by
+            for attr in ['first_name', 'last_name', 'phone_number', 'email']:
+                if attr in managed_by_data:
+                    setattr(user, attr, managed_by_data[attr])
+            user.save()
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)

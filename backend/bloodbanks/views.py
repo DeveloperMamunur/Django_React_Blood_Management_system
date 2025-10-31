@@ -10,6 +10,10 @@ class BloodBankListCreateView(generics.ListCreateAPIView):
     serializer_class = BloodBankSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def perform_create(self, serializer):
+        blood_banks = getattr(self.request.user, 'blood_banks', None)
+        serializer.save(blood_banks=blood_banks)
+
     def get_queryset(self):
         user = self.request.user
         if user.is_superuser or user.role == 'ADMIN':
@@ -36,6 +40,27 @@ class BloodBankDetailView(generics.RetrieveUpdateDestroyAPIView):
         except BloodBank.DoesNotExist:
             raise NotFound("No blood bank found for this user.")
 
+class CurrentBloodBankView(generics.RetrieveAPIView):
+    serializer_class = BloodBankSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        user = self.request.user
+        blood_bank, created = BloodBank.objects.get_or_create(
+            managed_by=user,
+            defaults={
+                "name": "",
+                "registration_number": "",
+                "contact_person": "",
+                "contact_number": "",
+                "email": "",
+                "operating_hours": "",
+                "storage_capacity": 0,
+                "is_active": True,
+            },
+        )
+        return blood_bank
+    
 
 class BloodInventoryListCreateView(generics.ListCreateAPIView):
     queryset = BloodInventory.objects.all()

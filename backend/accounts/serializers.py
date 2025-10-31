@@ -159,7 +159,7 @@ class ReceiverProfileSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         request = self.context.get('request')
-        user = request.user if request else None
+        user = request.user if request and request.user.is_authenticated else None
 
         location_data = validated_data.pop('location', None)
         location = None
@@ -183,6 +183,14 @@ class ReceiverProfileSerializer(serializers.ModelSerializer):
             else:
                 instance.location = Location.objects.create(**location_data)
 
+        request = self.context.get('request')
+        user_data = request.data.get('user') if request else None
+        if user_data:
+            for attr in ['first_name', 'last_name', 'phone_number']:
+                if attr in user_data:
+                    setattr(instance.user, attr, user_data[attr])
+            instance.user.save()
+
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
@@ -204,7 +212,7 @@ class HospitalProfileSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         request = self.context.get('request')
-        user = request.user if request else None
+        user = request.user if request and request.user.is_authenticated else None
 
         location_data = validated_data.pop('location', None)
         location = None
@@ -233,6 +241,14 @@ class HospitalProfileSerializer(serializers.ModelSerializer):
                 instance.location.save()
             else:
                 instance.location = Location.objects.create(**location_data)
+
+        request = self.context.get('request')
+        user_data = request.data.get('user') if request else None
+        if user_data:
+            for attr in ['first_name', 'last_name', 'phone_number']:
+                if attr in user_data:
+                    setattr(instance.user, attr, user_data[attr])
+            instance.user.save()
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)

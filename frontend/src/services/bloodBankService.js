@@ -105,7 +105,18 @@ export const bloodBankService = {
         } catch (error) {
             console.log(error);
         }
-    }
+    },
+    async currentBloodBank () {
+        try {
+            const response = await api.get('/bloodbanks/current/');
+            console.log(response.data);
+            
+            return response.data;    
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
 
 
 };

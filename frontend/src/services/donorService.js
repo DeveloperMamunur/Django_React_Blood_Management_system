@@ -63,7 +63,13 @@ export const donorService = {
     }
   },
   async currentDonor() {
-    const response = await api.get("/donors/current-profile/");
-    return response.data;
+    try {
+      const response = await api.get("/donors/current-profile/");
+      console.log("Current Donor fetched:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching current donor:", error);
+      return null;
+    }
   },
 };

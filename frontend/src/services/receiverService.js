@@ -42,5 +42,15 @@ export const receiverService = {
         } catch (error) {
             console.log(error);
         }
-    }
+    },
+     async currentReceiver () {
+        try {
+            const response = await api.get('/receivers/current-profile/');
+            console.log(response.data);
+            
+            return response.data;    
+        } catch (error) {
+            console.log(error);
+        }
+    },
 };

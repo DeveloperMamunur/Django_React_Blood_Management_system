@@ -5,7 +5,7 @@ from locations.models import Location
 class BloodBank(models.Model):
     name = models.CharField(max_length=255)
     registration_number = models.CharField(max_length=100, unique=True)
-    location = models.ForeignKey(Location, on_delete=models.CASCADE)
+    location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True, blank=True, related_name='blood_banks')
     contact_person = models.CharField(max_length=255)
     contact_number = models.CharField(max_length=17)
     email = models.EmailField()

@@ -8,7 +8,7 @@ from .views import (
     ReceiverProfileListCreateView, ReceiverProfileDetailView,
     HospitalProfileListCreateView, HospitalProfileDetailView,
     AdminProfileListCreateView, AdminProfileDetailView,
-    NearbyDonorsView
+    NearbyDonorsView, CurrentReceiverProfileView, CurrentHospitalProfileView
 )
 
 urlpatterns = [
@@ -25,9 +25,11 @@ urlpatterns = [
 
     path('receivers/', ReceiverProfileListCreateView.as_view(), name='receiver-list-create'),
     path('receivers/<int:pk>/', ReceiverProfileDetailView.as_view(), name='receiver-detail'),
+    path('receivers/current-profile/', CurrentReceiverProfileView.as_view(), name='current-receiver-profile'),
 
     path('hospitals/', HospitalProfileListCreateView.as_view(), name='hospital-list-create'),
     path('hospitals/<int:pk>/', HospitalProfileDetailView.as_view(), name='hospital-detail'),
+    path('hospitals/current-profile/', CurrentHospitalProfileView.as_view(), name='current-hospital-profile'),
 
     path('admin/', AdminProfileListCreateView.as_view(), name='admin-list-create'),
     path('admin/<int:pk>/', AdminProfileDetailView.as_view(), name='admin-detail'),
