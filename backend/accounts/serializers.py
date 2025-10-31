@@ -254,3 +254,11 @@ class HospitalProfileSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
         return instance
+
+class AllHospitalListSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    location = LocationSerializer(read_only=True)
+
+    class Meta:
+        model = HospitalProfile
+        fields = ['id', 'hospital_name', 'location', 'user']

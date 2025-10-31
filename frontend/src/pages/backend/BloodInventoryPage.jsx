@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Button } from "../../components/ui";
-import { Eye } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { bloodBankService } from "../../services/bloodBankService";
+import CreateBloodInventoryModal from "../../components/modals/CreateBloodInventoryModal";
 
 export default function BloodInventoryPage() {
     const { bloodBankId } = useParams(); 
     const [bloodBank, setBloodBank] = useState(null);
     const [bloods, setBloods] = useState([]);
     const [loading, setLoading] = useState(true);
-//   const [modalOpen, setModalOpen] = useState(false);
-//   const [selectedBloodId, setSelectedBloodId] = useState(null);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedBloodId, setSelectedBloodId] = useState(null);
 
-  useEffect(() => {
+
     const fetchBloods = async () => {
       try {
         const [inventoryRes, bankRes] = await Promise.all([
@@ -28,9 +29,11 @@ export default function BloodInventoryPage() {
         setLoading(false);
       }
     };
+    useEffect(() => {
+      if (!bloodBankId) return;
 
-    fetchBloods();
-  }, [bloodBankId]);
+      fetchBloods();
+    }, [bloodBankId]);
 
 
 
@@ -42,22 +45,35 @@ export default function BloodInventoryPage() {
     }
   };
 
-//   const handleView = (id) => {
-//     setSelectedBloodId(id);
-//     setModalOpen(true);
-//   };
+  const handleModalOpen = (id) => {
+    setSelectedBloodId(id);
+    setModalOpen(true);
+  };
 
-//   const closeModal = () => {
-//     setModalOpen(false);
-//     setSelectedBloodId(null);
-//   }
+
+  const handleView = (id) => {
+    setSelectedBloodId(id);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedBloodId(null);
+  }
 
   return (
     <div className="p-6">
-      <h1 className="dark:text-white text-2xl font-semibold text-center mb-6">
-        {bloodBank?.name || "Blood Bank"} Inventory
-      </h1>
-
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="dark:text-white text-2xl font-semibold text-center mb-6">
+          {bloodBank?.name || "Blood Bank"} Inventory
+        </h1>
+        <div className="flex gap-2">
+          <Link to="/blood-banks" className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 p-2 rounded-lg flex items-center gap-1 text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-300"><ArrowLeft className="w-6 h-6" />Back</Link>
+          <Button variant="primary" size="xs" onClick={() => handleModalOpen(null)}>
+            + Add Inventory
+          </Button>
+        </div>
+      </div>
       <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow">
         {loading ? (
           <p className="text-center py-6 text-gray-600 dark:text-gray-300">
@@ -86,7 +102,7 @@ export default function BloodInventoryPage() {
                   <td className="p-3 text-gray-700 dark:text-gray-200">{blood?.units_reserved || "—"}</td>
                   <td className="p-3 text-gray-700 dark:text-gray-200">{blood?.last_updated || "—"}</td>
                   <td className="p-3 text-gray-700 dark:text-gray-200 flex gap-2">
-                    {/* <Button variant="primary" size="xs" onClick={() => {handleView(blood.id)}}><Eye className="h-5 w-5" /> View</Button> */}
+                    <Button variant="primary" size="xs" onClick={() => handleView(blood.id)}>Edit</Button>
                     <Button variant="danger" size="xs" onClick={() => handleDelete(blood.id)}>Delete</Button>
 
                   </td>
@@ -97,7 +113,13 @@ export default function BloodInventoryPage() {
         )}
       </div>
 
-      {/* <BloodInventoryModal isOpen={modalOpen} onClose={closeModal} bloodInventoryId={selectedBloodId} /> */}
+      <CreateBloodInventoryModal
+        isOpen={modalOpen}
+        onClose={closeModal}
+        bloodInventoryId={selectedBloodId}
+        bloodBankId={bloodBankId}
+        onSuccess={fetchBloods}
+      />
     </div>
   );
 }

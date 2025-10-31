@@ -11,7 +11,7 @@ class DonorProfileListCreateView(generics.ListCreateAPIView):
         user = self.request.user
         if user.is_superuser or user.role == 'ADMIN':
             return DonorProfile.objects.all().order_by('-id')
-        return DonorProfile.objects.filter(user=user)
+        return DonorProfile.objects.filter(user=user, user__role='DONOR')
 
     def perform_create(self, serializer):
         donor_profile = getattr(self.request.user, 'donor_profile', None)

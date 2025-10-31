@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "../../components/ui";
-import { Eye } from "lucide-react";
+import { Eye, Plus } from "lucide-react";
 import { requestService } from "../../services/requestService";
-import RequestModal from "../../components/modals/RequestModal";
+import ViewRequestModal from "../../components/modals/ViewRequestModal";
+import CreateRequestModal from "../../components/modals/CreateRequestModal";
 
 
 
@@ -12,20 +13,22 @@ export default function RequestPage() {
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedRequestId, setSelectedRequestId] = useState(null);
 
-    useEffect(() => {
-        const fetchRequests = async () => {
-          try {
-            const res = await requestService.getAllRequests();
-            setRequests(res.results || res || []);
-          } catch (error) {
-            console.error("Error loading donors:", error);
-          } finally {
-            setLoading(false);
-          }
-        };
-    
-        fetchRequests();
-      }, []);
+    const fetchRequests = async () => {
+      try {
+        setLoading(true);
+        const res = await requestService.getAllRequests();
+        setRequests(res.results || res || []);
+      } catch (error) {
+        console.error("Error loading requests:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+  // Call it on mount
+  useEffect(() => {
+    fetchRequests();
+  }, []);
     
 
   const handleDelete = (id) => {
@@ -47,9 +50,17 @@ export default function RequestPage() {
 
   return (
     <div className="p-6">
-      <h1 className="dark:text-white text-2xl font-semibold text-center mb-6">
-        Receiver List
-      </h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="dark:text-white text-3xl font-semibold text-center mb-6">
+          Receiver List
+        </h1>
+        <Button onClick={() => {
+          setSelectedRequestId(null);
+          setModalOpen(true);
+        }}>
+          <Plus className="h-5 w-5" /> Add Request
+        </Button>
+      </div>
 
       <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow">
         {loading ? (
@@ -96,7 +107,17 @@ export default function RequestPage() {
         )}
       </div>
 
-      <RequestModal isOpen={modalOpen} onClose={closeModal} requestId={selectedRequestId} />
+      <CreateRequestModal
+        isOpen={modalOpen && !selectedRequestId}
+        onClose={closeModal}
+        onSuccess={fetchRequests}
+      />
+
+      <ViewRequestModal
+        isOpen={modalOpen && !!selectedRequestId}
+        onClose={closeModal}
+        requestId={selectedRequestId}
+      />
     </div>
   );
 }

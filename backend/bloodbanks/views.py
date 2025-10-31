@@ -18,7 +18,7 @@ class BloodBankListCreateView(generics.ListCreateAPIView):
         user = self.request.user
         if user.is_superuser or user.role == 'ADMIN':
             return BloodBank.objects.all()
-        return BloodBank.objects.filter(managed_by=user)
+        return BloodBank.objects.filter(managed_by=user, user__role='HOSPITAL')
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

@@ -4,7 +4,6 @@ export const hospitalService = {
     async getAllHospitals () {
         try {
             const response = await api.get('/hospitals/');
-            // console.log(response.data);
             
             return response.data;    
         } catch (error) {
@@ -47,6 +46,17 @@ export const hospitalService = {
     async currentHospital () {
         try {
             const response = await api.get('/hospitals/current-profile/');
+            console.log(response.data);
+            
+            return response.data;    
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
+    async allHospitals () {
+        try {
+            const response = await api.get('/hospitals/all/');
             console.log(response.data);
             
             return response.data;    

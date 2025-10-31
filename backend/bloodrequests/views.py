@@ -27,6 +27,9 @@ class BloodRequestListCreateView(generics.ListCreateAPIView):
 
         if user.role != 'ADMIN' or user.is_superuser:
             queryset = queryset.filter(requested_by=user)
+        
+        if user.role == 'DONOR':
+            queryset = queryset.filter(status='PENDING', location__isnull=False)
 
         return queryset
 

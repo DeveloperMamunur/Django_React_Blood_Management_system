@@ -18,7 +18,8 @@ from accounts.serializers import (
     PasswordChangeSerializer,
     HospitalProfileSerializer,
     ReceiverProfileSerializer,
-    AdminProfileSerializer
+    AdminProfileSerializer,
+    AllHospitalListSerializer
 )
 from donors.serializers import DonorProfileSerializer
 from common.utils.distance import calculate_distance
@@ -162,7 +163,7 @@ class AdminProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_object(self):
         if self.request.is_superuser or self.request.user.role == 'ADMIN':
             return self.get_queryset().get(pk=self.kwargs['pk'])
-        return self.request.user.receiver_profile
+        return self.request.user.admin_profile
 
 # -----------------------------
 # Receiver Profiles
@@ -180,7 +181,7 @@ class ReceiverProfileListCreateView(generics.ListCreateAPIView):
         user = self.request.user
         if user.is_superuser or user.role == 'ADMIN':
             return ReceiverProfile.objects.all()
-        return ReceiverProfile.objects.filter(user=user)
+        return ReceiverProfile.objects.filter(user=user, user__role='RECEIVER')
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -235,7 +236,7 @@ class HospitalProfileListCreateView(generics.ListCreateAPIView):
         user = self.request.user
         if user.is_superuser or user.role == 'ADMIN':
             return HospitalProfile.objects.all()
-        return HospitalProfile.objects.filter(user=user)
+        return HospitalProfile.objects.filter(user=user, user__role='HOSPITAL')
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -280,6 +281,13 @@ class CurrentHospitalProfileView(generics.RetrieveUpdateAPIView):
             },
         )
         return hospital_profile
+
+
+class AllHospitalList(generics.ListAPIView):
+    queryset = HospitalProfile.objects.all()
+    serializer_class = AllHospitalListSerializer
+    permission_classes = [permissions.AllowAny]
+
 
 # -----------------------------
 # Nearby Donors

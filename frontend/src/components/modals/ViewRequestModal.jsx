@@ -3,7 +3,7 @@ import Modal from "./Modal";
 import Button from "../ui/Button";
 import { requestService } from "../../services/requestService";
 
-export default function RequestModal({ requestId, isOpen, onClose }) {
+export default function ViewRequestModal({ requestId, isOpen, onClose }) {
   const [request, setRequest] = useState(null);
   const [loading, setLoading] = useState(false);
 
