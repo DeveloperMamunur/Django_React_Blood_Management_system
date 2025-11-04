@@ -62,7 +62,15 @@ export const authService = {
             console.log(error);
             
         }
-    }
+    },
+    async logout ({ refresh })  {
+        try {
+            await api.post("/auth/logout/", { refresh });
+        } catch (error) {
+            console.warn("Logout failed:", error);
+        }
+    },
+
 }
 
 export default api;

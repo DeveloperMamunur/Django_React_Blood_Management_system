@@ -51,10 +51,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    setCurrentUser(null);
+  const logout = async () => {
+    try {
+      const refresh = localStorage.getItem("refresh_token");
+      if (refresh) {
+        await authService.logout({ refresh }); // Call backend logout endpoint
+      }
+    } catch (err) {
+      console.warn("Logout failed:", err);
+    } finally {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      setCurrentUser(null);
+      window.location.href = "/login";
+    }
   };
 
   const refreshCurrentUser = async () => {

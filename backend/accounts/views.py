@@ -2,7 +2,7 @@ from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model, authenticate
 from .models import HospitalProfile, ReceiverProfile, AdminProfile
@@ -82,13 +82,16 @@ class UserLogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
+        refresh_token = request.data.get("refresh")
+        if not refresh_token:
+            return Response({"detail": "Refresh token is required."}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            refresh_token = request.data.get("refresh")
             token = RefreshToken(refresh_token)
             token.blacklist()
-            return Response({"detail": "Logged out successfully."}, status=status.HTTP_205_RESET_CONTENT)
-        except Exception:
-            return Response({"detail": "Invalid token."}, status=status.HTTP_400_BAD_REQUEST)
+        except TokenError:
+            # Token already blacklisted or invalid
+            pass
+        return Response({"detail": "Logged out successfully."}, status=status.HTTP_205_RESET_CONTENT)
 
 
 # -----------------------------
