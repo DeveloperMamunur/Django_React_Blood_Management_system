@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import ReceiverProfile, HospitalProfile, AdminProfile
+from donors.models import DonorProfile
 from locations.models import Location
 from locations.serializers import LocationSerializer
 from analytics.models import ActivityLog
@@ -56,6 +57,60 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         )
         return user
 
+        if user.role == 'DONOR':
+            DonorProfile.objects.create(
+                user=user,
+                blood_group='O+',
+                gender='O',
+                weight=50.0,
+                date_of_birth="1900-01-01",
+                is_available=True
+            )
+
+        elif user.role == 'RECEIVER':
+            from accounts.models import ReceiverProfile
+            ReceiverProfile.objects.create(
+                user=user,
+                age=0,
+                blood_group='O+',
+                contact_number='',
+                emergency_contact=''
+            )
+
+        elif user.role == 'HOSPITAL':
+            from accounts.models import HospitalProfile
+            HospitalProfile.objects.create(
+                user=user,
+                hospital_name=f"Hospital - {user.username}",
+                registration_number=f"HOSP-{user.id:05d}",
+                hospital_type='PRIVATE',
+                emergency_contact='N/A',
+                has_blood_bank=False
+            )
+
+        elif user.role == 'ADMIN':
+            from accounts.models import AdminProfile
+            AdminProfile.objects.create(
+                user=user,
+                age=0,
+                blood_group='O+',
+                contact_number='',
+                emergency_contact=''
+            )
+
+        elif user.role == 'BLOOD_BANK':
+            from blood_banks.models import BloodBank
+            BloodBank.objects.create(
+                name=f"Blood Bank - {user.username}",
+                registration_number=f"BB-{user.id:05d}",
+                contact_person=user.username,
+                contact_number='',
+                email=user.email or '',
+                storage_capacity=0,
+                managed_by=user,
+                operating_hours="24/7",
+                is_active=True
+            )
     def get_client_ip(self, request):
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         return x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')

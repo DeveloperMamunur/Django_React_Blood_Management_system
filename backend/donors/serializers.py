@@ -9,11 +9,21 @@ from locations.models import Location
 class DonorProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     location = LocationSerializer(required=False, allow_null=True)
+    total_donations = serializers.IntegerField(read_only=True)
+    donation_points = serializers.IntegerField(read_only=True)
+    can_donate = serializers.SerializerMethodField()
+    days_until_eligible = serializers.SerializerMethodField()
 
     class Meta:
         model = DonorProfile
         fields = '__all__'
         read_only_fields = ['user', 'total_donations', 'donation_points', 'is_verified', 'verified_at', 'verified_by']
+
+    def get_can_donate(self, obj):
+        return obj.is_available and obj.can_donate()
+        
+    def get_days_until_eligible(self, obj):
+        return obj.days_until_eligible()
 
     def create(self, validated_data):
         request = self.context.get('request')
@@ -22,7 +32,7 @@ class DonorProfileSerializer(serializers.ModelSerializer):
         location_data = validated_data.pop('location', None)
         location = None
         if location_data:
-            location = Location.objects.create(**location_data)
+            location = Location.objects.get_or_create(**location_data)
 
         donor, created = DonorProfile.objects.update_or_create(
             user=user,
@@ -38,7 +48,7 @@ class DonorProfileSerializer(serializers.ModelSerializer):
                     setattr(instance.location, attr, value)
                 instance.location.save()
             else:
-                instance.location = Location.objects.create(**location_data)
+                instance.location = Location.objects.get_or_create(**location_data)
 
         request = self.context.get('request')
         user_data = request.data.get('user') if request else None
