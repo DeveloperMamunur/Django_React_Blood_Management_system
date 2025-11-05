@@ -21,20 +21,21 @@ import { useAuth } from "../../hooks/useAuth";
 
 export default function Sidebar() {
   const location = useLocation();
-  const currentPage = location.pathname.split('/')[1] || 'dashboard';
   const { sidebarOpen, closeSidebar } = useSidebar();
-  const { logout } = useAuth();
+  const { currentUser, logout } = useAuth();
+
+  const role = currentUser?.role || '';
 
   const navItems = [
-    { id: "dashboard", name: "Dashboard", icon: LayoutDashboard },
-    { id: "users", name: "Users", icon: Users },
-    { id: "donors", name: "Donors", icon: HeartHandshake },
-    { id: "hospitals", name: "Hospitals", icon: Hospital },
-    { id: "blood-banks", name: "Blood Banks", icon: Droplet },
-    { id: "receivers", name: "Receivers", icon: UserRound },
-    { id: "requests", name: "Requests", icon: FileText },
-    { id: "campaigns", name: "Campaigns", icon: Megaphone },
-    { id: "reports", name: "Reports", icon: BarChart3 },
+    { id: 1, link: "/dashboard", name: "Dashboard", icon: LayoutDashboard, roles: ["ADMIN", "RECEIVER", "HOSPITAL", "BLOOD_BANK", "DONOR"] },
+    { id: 2, link: "/dashboard/users", name: "Users", icon: Users, roles: ["ADMIN"] },
+    { id: 3, link: "/dashboard/donors", name: "Donors", icon: HeartHandshake, roles: ["ADMIN"] },
+    { id: 4, link: "/dashboard/hospitals", name: "Hospitals", icon: Hospital, roles: ["ADMIN"]},
+    { id: 5, link: "/dashboard/blood-banks", name: "Blood Banks", icon: Droplet, roles: ["ADMIN"] },
+    { id: 6, link: "/dashboard/receivers", name: "Receivers", icon: UserRound, roles: ["ADMIN"] },
+    { id: 7, link: "/dashboard/requests", name: "Requests", icon: FileText, roles: ["ADMIN", "RECEIVER", "HOSPITAL", "DONOR"] },
+    { id: 8, link: "/dashboard/campaigns", name: "Campaigns", icon: Megaphone, roles: ["ADMIN", "BLOOD_BANK"] },
+    { id: 9, link: "/dashboard/reports", name: "Reports", icon: BarChart3, roles: ["ADMIN"]},
   ];
 
   const handleLogout = () => {
@@ -49,7 +50,7 @@ export default function Sidebar() {
           sidebarOpen ? "w-64" : "w-20"
         } bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-500 ease-in-out z-30`}
       >
-        <div className="flex items-center justify-between p-4 border-b border-gray-700">
+        <Link to="/" className="flex items-center justify-between p-4 border-b border-gray-700">
           <div
             className={`flex items-center transition-opacity duration-300 ${
               sidebarOpen ? "opacity-100" : "opacity-0"
@@ -67,19 +68,21 @@ export default function Sidebar() {
           {!sidebarOpen && (
             <Heart className="h-8 w-8 text-red-500 mx-auto transition-all duration-300" />
           )}
-        </div>
+        </Link>
 
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          {navItems.map((item) => {
+          {navItems
+          .filter(item => item.roles.includes(role))
+          .map((item) => {
             const Icon = item.icon;
             return (
               <Link
                 key={item.id}
-                to={`/${item.id}`}
+                to={item.link}
                 className={`w-full flex items-center ${
                   sidebarOpen ? "px-4 justify-start" : "px-0 justify-center"
                 } py-3 rounded-lg transition-all duration-300 ${
-                  currentPage === item.id
+                  location.pathname === item.link
                     ? "bg-red-600 text-white shadow-lg"
                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 }`}
@@ -162,10 +165,10 @@ export default function Sidebar() {
             return (
               <Link
                 key={item.id}
-                to={`/${item.id}`}
+                to={item.link}
                 onClick={closeSidebar}
                 className={`w-full flex items-center px-4 py-3 rounded-lg transition-all duration-300 ${
-                  currentPage === item.id
+                  location.pathname === item.link
                     ? "bg-red-600 text-white shadow-lg"
                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 }`}

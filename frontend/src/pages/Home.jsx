@@ -1,6 +1,10 @@
-import { Droplet, Users, Activity, Calendar, Shield, Award } from 'lucide-react';
+import { Droplet, Users, Activity, Calendar, Shield, Award, Target, Clock, MapPin} from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { campaignService } from '../services/campaignService';
 
 export default function Home() {
+  const [campaigns, setCampaigns] = useState([]);
 
   const bloodTypes = [
     { type: 'A+', units: 245, status: 'high' },
@@ -19,6 +23,15 @@ export default function Home() {
     { icon: Activity, label: 'Lives Saved', value: '45,678' },
     { icon: Calendar, label: 'Donations This Month', value: '1,234' }
   ];
+
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      const res = await campaignService.listCampaigns();
+      setCampaigns(res.results || res || []);
+    };
+    fetchCampaigns();
+  }, []);
+
 
   return (
     <div>
@@ -48,7 +61,7 @@ export default function Home() {
               </div>
             </div>
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-pink-500 rounded-3xl blur-3xl opacity-20"></div>
+              <div className="absolute inset-0 bg-linear-to-r from-red-500 to-pink-500 rounded-3xl blur-3xl opacity-20"></div>
               <div className={`relative dark:bg-gray-800' : 'bg-white'} p-8 rounded-3xl shadow-2xl`}>
                 <div className="grid grid-cols-2 gap-4">
                   {bloodTypes.map((blood, idx) => (
@@ -122,6 +135,111 @@ export default function Home() {
                 </div>
                 <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
                 <p className={'dark:text-gray-400 text-gray-600'}>{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      {/* Campaign Banner */}
+      <div className="bg-gradient-to-r from-red-600 to-red-500 text-white py-3 px-4 sm:px-6 lg:px-8 my-16">
+        <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center space-x-3">
+            <div className="bg-white/20 rounded-full p-2 animate-pulse">
+              <Droplet className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="font-semibold text-sm sm:text-base">🚨 Urgent: O- Blood Needed at Central Hospital</p>
+              <p className="text-xs sm:text-sm opacity-90">Only 28 units remaining - Critical shortage</p>
+            </div>
+          </div>
+          <button className="bg-white text-red-600 px-6 py-2 rounded-lg font-semibold text-sm hover:bg-gray-100 transition-all whitespace-nowrap">
+            Donate Now
+          </button>
+        </div>
+      </div>
+      {/* Campaigns Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 dark:bg-gray-800/50 bg-gray-100">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4">Active Blood Donation Campaigns</h2>
+            <p className="text-lg dark:text-gray-400 text-gray-600">
+              Join our ongoing campaigns and make an immediate impact
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {campaigns?.map((campaign) => (
+              <div
+                key={campaign.id}
+                className={`dark:bg-gray-800 bg-white rounded-2xl shadow-lg overflow-hidden transition-all hover:scale-105 dark:hover:bg-gray-700`}
+              >
+                <div className="bg-red-500 text-white text-center py-2 text-sm font-semibold">
+                  On Going
+                </div>
+                {/* Campaign Banner Image */}
+                <div className="relative h-48 bg-gradient-to-br from-red-500 to-pink-500 overflow-hidden">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center text-white p-6">
+                      <Droplet className="w-16 h-16 mx-auto mb-3 opacity-90" />
+                      <h3 className="text-2xl font-bold">{campaign.campaign_name}</h3>
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 bg-black/10"></div>
+                  {/* Decorative elements */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
+                </div>
+                <div className="p-6 space-y-4">
+                  
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center space-x-2 dark:text-gray-400 text-gray-600">
+                      <MapPin className="w-4 h-4 text-red-500" />
+                      <span>{campaign.address_line1}, {campaign.city}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 dark:text-gray-400 text-gray-600">
+                      <Clock className="w-4 h-4 text-red-500" />
+                      <span>{campaign.start_date} - {campaign.end_date}</span>
+                    </div>
+                    <div className="flex items-center space-x-2 dark:text-gray-400 text-gray-600">
+                      <Target className="w-4 h-4 text-red-500" />
+                      <span>Target: {campaign.target_donors}</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    {/* <div className="flex justify-between text-sm">
+                      <span className="dark:text-gray-400 text-gray-600">Progress</span>
+                      <span className="font-semibold">{campaign.collected}</span>
+                    </div> */}
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                      <div 
+                        className="bg-red-500 h-2 rounded-full transition-all"
+                        style={{ 
+                          width: `${(parseInt(campaign.collected) / parseInt(campaign.target)) * 100}%` 
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2"> 
+                    <div className="text-sm dark:text-gray-400 text-gray-600 mb-2">Blood Types Needed:</div>
+                    <div>
+                        <span 
+                          className="px-3 py-1 bg-red-500/10 text-red-500 rounded-full text-xs font-semibold"
+                        >
+                          All Blood Group
+                        </span>
+                    </div>
+                  </div>
+                  {campaign?.registrations === false ? (
+                    <Link to={`/dashboard/campaign/${campaign.id}/register` } className="w-full bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-all px-4 py-2">
+                      Register Now
+                    </Link> 
+                    ) : (
+                      <Link disabled className="w-full bg-red-300 text-white rounded-lg font-semibold transition-all px-4 py-2">
+                        Already Registered
+                      </Link>
+                    )}
+                </div>
               </div>
             ))}
           </div>

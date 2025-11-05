@@ -11,14 +11,25 @@ export const campaignService = {
             console.log(error);
         }
     },
-    async createCampaign (data) {
+    async allCampaigns () {
         try {
-            const response = await api.post("/campaigns/", data);
+            const response = await api.get('/auth/campaigns/all/');
             console.log(response.data);
             
             return response.data;    
         } catch (error) {
             console.log(error);
+        }
+    },
+    async createCampaign(formData) {
+        try {
+            const response = await api.post("/campaigns/", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+            });
+            return response.data;
+        } catch (error) {
+            console.error(error);
+            throw error;
         }
     },
     async getCampaignById (id) {
@@ -34,7 +45,9 @@ export const campaignService = {
 
     async updateCampaign (id, data) {
         try {
-            const response = await api.put(`/campaigns/${id}/`, data);
+            const response = await api.put(`/campaigns/${id}/`, data,{
+            headers: { "Content-Type": "multipart/form-data" },
+            });
             console.log(response.data);
             
             return response.data;    
@@ -53,9 +66,9 @@ export const campaignService = {
         }
     },
 
-    async getCampaignRegistrations () {
+    async getCampaignRegistrationDonors (campaignId) {
         try {
-            const response = await api.get("/campaigns/registrations/");
+            const response = await api.get(`/campaigns/${campaignId}/registrations/`);
             console.log(response.data);
             
             return response.data;    
@@ -64,9 +77,9 @@ export const campaignService = {
         }
     },
 
-    async createCampaignRegistration (data) {
+    async createCampaignRegistrationDonor (campaignId, data) {
         try {
-            const response = await api.post("/campaigns/registrations/", data);
+            const response = await api.post(`/campaigns/${campaignId}/registrations/`, data);
             console.log(response.data);
             
             return response.data;    
@@ -74,9 +87,9 @@ export const campaignService = {
             console.log(error);
         }
     },
-    async getCampaignRegistrationById (id) {
+    async getCampaignRegistrationDonorById (campaignId, id) {
         try {
-            const response = await api.get(`/campaigns/registrations/${id}/`);
+            const response = await api.get(`/campaigns/${campaignId}/registrations/${id}/`);
             console.log(response.data);
             
             return response.data;    
@@ -85,9 +98,9 @@ export const campaignService = {
         }
     },
 
-    async updateCampaignRegistration (id, data) {
+    async updateCampaignRegistrationDonor (campaignId, id, data) {
         try {
-            const response = await api.put(`/campaigns/registrations/${id}/`, data);
+            const response = await api.put(`/campaigns/${campaignId}/registrations/${id}/`, data);
             console.log(response.data);
             
             return response.data;    
@@ -95,11 +108,30 @@ export const campaignService = {
             console.log(error);
         }
     },
-    async deleteCampaignRegistration (id) {
+    async deleteCampaignRegistrationDonor (campaignId, id) {
         try {
-            const response = await api.delete(`/campaigns/registrations/${id}/`);
+            const response = await api.delete(`/campaigns/${campaignId}/registrations/${id}/`);
             console.log(response.data);
             
+            return response.data;    
+        } catch (error) {
+            console.log(error);
+        }
+    },
+    async listCampaigns () {
+        try {
+            const response = await api.get('/campaigns/list/');
+            console.log(response.data);
+            
+            return response.data;    
+        } catch (error) {
+            console.log(error);
+        }
+    },
+    async currentCampaign (id) {
+        try {
+            const response = await api.get(`/campaigns/details/${id}/`);
+            console.log(response.data);
             return response.data;    
         } catch (error) {
             console.log(error);

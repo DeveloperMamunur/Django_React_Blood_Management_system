@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Heart, Sun, Moon, Menu, X } from 'lucide-react';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
+
 
 export default function Home() {
+    const { currentUser } = useAuth();
     const { darkMode, toggleDarkMode } = useDarkMode();
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -36,9 +39,15 @@ export default function Home() {
               >
                 {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
-              <Link to="/login" className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-all transform hover:scale-105">
-                Sign In
-              </Link>
+              {!currentUser ? (
+                <Link to="/login" className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-all transform hover:scale-105">
+                  Sign In
+                </Link> 
+              ) : (
+                <Link to="/dashboard" className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-all transform hover:scale-105">
+                  Dashboard
+                </Link>
+              )}
             </div>
 
             <div className="md:hidden flex items-center space-x-2">
@@ -59,12 +68,21 @@ export default function Home() {
         {mobileMenuOpen && (
           <div className={`md:hidden dark:bg-gray-900 bg-white border-t dark:border-gray-800 border-gray-200}`}>
             <div className="px-4 py-4 space-y-3">
-              <a href="#home" className="block hover:text-red-500 transition-colors">Home</a>
+              <Link to="/" className="block hover:text-red-500 transition-colors">Home</Link>
               <a href="#about" className="block hover:text-red-500 transition-colors">About</a>
               <a href="#donate" className="block hover:text-red-500 transition-colors">Donate</a>
               <a href="#inventory" className="block hover:text-red-500 transition-colors">Inventory</a>
               <a href="#contact" className="block hover:text-red-500 transition-colors">Contact</a>
-              <button className="w-full bg-red-500 text-white px-6 py-2 rounded-lg">Sign In</button>
+              {!currentUser ? (
+                <Link to="/login" className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-all transform hover:scale-105">
+                  Sign In
+                </Link> 
+              ) : (
+                <Link to="/dashboard" className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-all transform hover:scale-105">
+                  Dashboard
+                </Link>
+              )}
+              
             </div>
           </div>
         )}

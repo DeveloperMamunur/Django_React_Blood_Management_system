@@ -80,16 +80,18 @@ export default function RequestPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="dark:text-white text-3xl font-semibold text-center mb-6">
-          Receiver List
+          Request List
         </h1>
-        <Button
-          onClick={() => {
-            setSelectedRequestId(null);
-            setModalOpen(true);
-          }}
-        >
-          <Plus className="h-5 w-5" /> Add Request
-        </Button>
+        {currentUser?.role === "RECEIVER" || currentUser?.role === "HOSPITAL" || currentUser?.role === "ADMIN" && (
+          <Button
+            onClick={() => {
+              setSelectedRequestId(null);
+              setModalOpen(true);
+            }}
+          >
+            <Plus className="h-5 w-5" /> Add Request
+          </Button>
+        )}
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow">
@@ -133,6 +135,7 @@ export default function RequestPage() {
                         onChange={(e) => handleStatusChange(request.id, e.target.value)}
                         className="px-2 py-1 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200"
                       >
+                        <option value="">Select Status</option>
                         {requestStatus
                           .filter(status => status.roles.includes(role))
                           .map((status) => (

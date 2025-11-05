@@ -95,10 +95,10 @@ export default function CampaignModal({ campaignId, isOpen, onClose }) {
                 <tr>
                   <td className="p-3 font-semibold">Blood Banks Involved</td>
                   <td className="p-3">
-                    {campaign.blood_banks_involved?.length > 0
-                      ? campaign.blood_banks_involved.map((b) => b.name).join(", ")
-                      : "None"}
-                  </td>
+                      {campaign.blood_banks_involved_details && campaign.blood_banks_involved_details.length > 0
+                        ? campaign.blood_banks_involved_details.map((b) => b.name).join(", ")
+                        : "No blood banks linked"}
+                    </td>
                 </tr>
                 <tr>
                   <td className="p-3 font-semibold">Completion Rate</td>

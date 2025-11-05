@@ -12,43 +12,34 @@ import json
 
 class BloodDriveCampaignSerializer(serializers.ModelSerializer):
     organizer = UserSerializer(read_only=True)
-    location = LocationSerializer(required=False, allow_null=True)
+    location = LocationSerializer()
     blood_banks_involved = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=BloodBank.objects.all()
+        many=True, queryset=BloodBank.objects.all(), required=False
     )
-    banner_image = serializers.ImageField(required=False, allow_null=True)
-
+    registrations = serializers.SerializerMethodField()
+    registration_count = serializers.IntegerField(read_only=True)
+    completion_rate = serializers.SerializerMethodField()
     class Meta:
         model = BloodDriveCampaign
-        fields = '__all__'
-        extra_kwargs = {
-            'organizer': {'read_only': True},
-        }
+        fields = "__all__"
+        read_only_fields = ["organizer", "created_at", "updated_at"]
+    
+    def get_registrations(self, obj):
+        return obj.get_registrations().count()
+
+    def get_completion_rate(self, obj):
+        return round(obj.completion_rate(), 2)
 
     def create(self, validated_data):
-        request = self.context.get('request')
-        user = request.user if request and request.user.is_authenticated else None
-
-        validated_data.pop('organizer', None)
-        location_data = validated_data.pop('location', None)
-        if isinstance(location_data, str):
-            try:
-                location_data = json.loads(location_data)
-            except json.JSONDecodeError:
-                raise ValidationError({'location': 'Invalid JSON format.'})
-
-        blood_banks = validated_data.pop('blood_banks_involved', [])
-
-        if not location_data:
-            raise ValidationError({'location': 'This field is required.'})
+        location_data = validated_data.pop("location")
+        blood_banks = validated_data.pop("blood_banks_involved", [])
+        banner_image = validated_data.pop("banner_image", None)
         location = Location.objects.create(**location_data)
+        campaign = BloodDriveCampaign.objects.create(location=location, **validated_data)
 
-        campaign = BloodDriveCampaign.objects.create(
-            organizer=user,
-            location=location,
-            **validated_data
-        )
+        if banner_image:
+            campaign.banner_image = banner_image
+        campaign.save()
 
         if blood_banks:
             campaign.blood_banks_involved.set(blood_banks)
@@ -56,35 +47,44 @@ class BloodDriveCampaignSerializer(serializers.ModelSerializer):
         return campaign
 
     def update(self, instance, validated_data):
-        location_data = validated_data.pop('location', None)
-        blood_banks = validated_data.pop('blood_banks_involved', None)
-        banner_image = validated_data.pop('banner_image', None)
-
-        if isinstance(location_data, str):
-            try:
-                location_data = json.loads(location_data)
-            except json.JSONDecodeError:
-                raise ValidationError({'location': 'Invalid JSON format.'})
+        location_data = validated_data.pop("location", None)
+        blood_banks = validated_data.pop("blood_banks_involved", None)
 
         if location_data:
             if instance.location:
-                for attr, value in location_data.items():
-                    setattr(instance.location, attr, value)
+                for key, value in location_data.items():
+                    setattr(instance.location, key, value)
                 instance.location.save()
             else:
                 instance.location = Location.objects.create(**location_data)
 
-        if blood_banks is not None:
-            instance.blood_banks_involved.set(blood_banks)
-
-        if banner_image:
-            instance.banner_image = banner_image
-
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
+        if blood_banks is not None:
+            instance.blood_banks_involved.set(blood_banks)
+
         instance.save()
         return instance
+
+class CampaignListSerializer(serializers.ModelSerializer):
+
+    address_line1 = serializers.CharField(source='location.address_line1', read_only=True)
+    city = serializers.CharField(source='location.city', read_only=True)
+    registrations = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BloodDriveCampaign
+        fields = ['id', 'campaign_name', 'start_date', 'end_date', 'target_donors', 'address_line1', 'city', 'status', 'banner_image','venue_details', 'registrations']
+    
+    def get_registrations(self, obj):
+        user = self.context['request'].user
+        donor = user.donor_profile if user.is_authenticated else None
+        if donor:
+            return obj.get_registrations().filter(donor=donor).exists()
+        return False
+
+
 
 class CampaignRegistrationSerializer(serializers.ModelSerializer):
     donor = DonorProfileSerializer(read_only=True)
@@ -97,7 +97,7 @@ class CampaignRegistrationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context['request'].user
         donor = user.donor_profile
-        campaign_id = self.context['request'].data.get('campaign')
+        campaign_id = self.context.get('campaign_id') or validated_data.get('campaign')
 
         if not campaign_id:
             raise serializers.ValidationError({"campaign": "Campaign ID is required."})
@@ -110,4 +110,9 @@ class CampaignRegistrationSerializer(serializers.ModelSerializer):
         if CampaignRegistration.objects.filter(campaign=campaign, donor=donor).exists():
             raise serializers.ValidationError("You have already registered for this campaign.")
 
-        return CampaignRegistration.objects.create(campaign=campaign, donor=donor, **validated_data)
+        return CampaignRegistration.objects.create(
+            campaign=campaign,
+            donor=donor,
+            preferred_time_slot=validated_data.get("preferred_time_slot", ""),
+            notes=validated_data.get("notes", "")
+        )

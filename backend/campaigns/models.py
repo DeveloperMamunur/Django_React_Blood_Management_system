@@ -40,6 +40,9 @@ class BloodDriveCampaign(models.Model):
         donated = self.campaignregistration_set.filter(status='DONATED').count()
         return (donated / total * 100) if total else 0
 
+    def get_registrations(self):
+        return self.campaignregistration_set.all()
+
 
 class CampaignRegistration(models.Model):
     STATUS_CHOICES = (
@@ -59,7 +62,9 @@ class CampaignRegistration(models.Model):
     
     class Meta:
         db_table = 'campaign_registrations'
-        unique_together = ('campaign', 'donor')
+        constraints = [
+            models.UniqueConstraint(fields=['campaign', 'donor'], name='unique_campaign_donor')
+        ]
     
     def __str__(self):
         return f"{self.donor.user.username} - {self.campaign.campaign_name}"

@@ -23,6 +23,8 @@ export default function Button({
       "bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white shadow-lg shadow-red-500/30 dark:shadow-red-500/20 focus:ring-red-500/50",
     success:
       "bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white shadow-lg shadow-emerald-500/30 dark:shadow-emerald-500/20 focus:ring-emerald-500/50",
+    warning:
+      "bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white shadow-lg shadow-yellow-500/30 dark:shadow-yellow-500/20 focus:ring-yellow-500/50",
     ghost:
       "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:ring-gray-500/30",
   };

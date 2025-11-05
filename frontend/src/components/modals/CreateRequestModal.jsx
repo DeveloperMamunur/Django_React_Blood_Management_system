@@ -175,7 +175,7 @@ export default function CreateRequestModal({ isOpen, onClose, onSuccess, request
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Create Blood Request">
+    <Modal isOpen={isOpen} onClose={onClose} modalSize="3xl" title="Create Blood Request">
       {loading ? (
         <div className="flex justify-center py-6">
           <Loader2 className="w-6 h-6 animate-spin text-red-600 dark:text-red-400" />

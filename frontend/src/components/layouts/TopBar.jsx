@@ -1,11 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { useDarkMode } from "../../hooks/useDarkMode";
-import { Users, Calendar, Search, Bell, Menu, Moon, Sun, LayoutDashboard, Package, FileText, BarChart3, LogOut, Settings, User } from 'lucide-react';
-import { Link } from "react-router-dom";
+import { Users, Calendar, Search, Bell, Menu, Moon, Sun, LayoutDashboard,  FileText, BarChart3, LogOut, Settings, User, HeartHandshake, Hospital, Droplet, UserRound, Megaphone} from 'lucide-react';
+import { Link, useLocation } from "react-router-dom";
 import { useSidebar } from "../../hooks/useSidebar";
 import { useAuth } from "../../hooks/useAuth";
 
-let currentPage = 'dashboard';
 
 export default function TopBar() {
     const { currentUser, logout } = useAuth();
@@ -16,6 +15,8 @@ export default function TopBar() {
     const notificationRef = useRef(null);
     const profileRef = useRef(null);
 
+    const location = useLocation();
+    const currentPath = location.pathname.split('/')[2] || 'dashboard';
     // Mock notifications data
     const notifications = [
         { id: 1, title: 'New blood request', message: 'O+ blood needed urgently', time: '5 min ago', unread: true },
@@ -25,11 +26,11 @@ export default function TopBar() {
     ];
 
     const profiles = [
-        {role: 'DONOR', link: '/donor/profile' },
-        {role: 'ADMIN', link: '/admin/profile' },
-        {role: 'RECEIVER', link: '/receiver/profile' },
-        {role: 'HOSPITAL', link: '/hospital/profile' },
-        {role: 'BLOOD_BANK', link: '/bloodbank/profile' },
+        {role: 'DONOR', link: '/dashboard/donor/profile' },
+        {role: 'ADMIN', link: '/dashboard/admin/profile' },
+        {role: 'RECEIVER', link: '/dashboard/receiver/profile' },
+        {role: 'HOSPITAL', link: '/dashboard/hospital/profile' },
+        {role: 'BLOOD_BANK', link: '/dashboard/bloodbank/profile' },
     ]
 
     // Close dropdowns when clicking outside
@@ -47,13 +48,18 @@ export default function TopBar() {
     }, []);
 
     const navItems = [
-        { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard },
-        { id: 'inventory', name: 'Inventory', icon: Package },
-        { id: 'donors', name: 'Donors', icon: Users },
-        { id: 'requests', name: 'Requests', icon: FileText },
-        { id: 'appointments', name: 'Appointments', icon: Calendar },
-        { id: 'reports', name: 'Reports', icon: BarChart3 },
+        { id: 1, link: "/dashboard", name: "Dashboard", icon: LayoutDashboard, roles: ["ADMIN", "RECEIVER", "HOSPITAL", "BLOOD_BANK", "DONOR"] },
+        { id: 2, link: "/dashboard/users", name: "Users", icon: Users, roles: ["ADMIN"] },
+        { id: 3, link: "/dashboard/donors", name: "Donors", icon: HeartHandshake, roles: ["ADMIN"] },
+        { id: 4, link: "/dashboard/hospitals", name: "Hospitals", icon: Hospital, roles: ["ADMIN"]},
+        { id: 5, link: "/dashboard/blood-banks", name: "Blood Banks", icon: Droplet, roles: ["ADMIN"] },
+        { id: 6, link: "/dashboard/receivers", name: "Receivers", icon: UserRound, roles: ["ADMIN"] },
+        { id: 7, link: "/dashboard/requests", name: "Requests", icon: FileText, roles: ["ADMIN", "RECEIVER", "HOSPITAL", "DONOR"] },
+        { id: 8, link: "/dashboard/campaigns", name: "Campaigns", icon: Megaphone, roles: ["ADMIN", "BLOOD_BANK"] },
+        { id: 9, link: "/dashboard/reports", name: "Reports", icon: BarChart3, roles: ["ADMIN"]},
     ];
+
+    const currentPage = navItems.find(item => item.link.endsWith(currentPath))?.id || 1;
 
     return (
         <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-20">
@@ -151,12 +157,12 @@ export default function TopBar() {
                                     .filter((p) => p.role === currentUser?.role)
                                     .map((item) => (
                                         <Link
-                                        key={item.role}
-                                        to={item.link}
-                                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-3"
+                                            key={item.role}
+                                            to={item.link}
+                                            className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-3"
                                         >
-                                        <User className="h-4 w-4" />
-                                        <span>My Profile</span>
+                                            <User className="h-4 w-4" />
+                                            <span>My Profile</span>
                                         </Link>
                                     ))}
                                 <button className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-3">

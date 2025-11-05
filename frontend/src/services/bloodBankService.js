@@ -117,6 +117,15 @@ export const bloodBankService = {
         }
     },
 
-
+    async allBloodBanksList () {
+        try {
+            const response = await api.get('/bloodbanks/all/');
+            console.log(response.data);
+            
+            return response.data;    
+        } catch (error) {
+            console.log(error);
+        }
+    },
 
 };

@@ -1,5 +1,7 @@
 from django.db import models
 from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut, GeocoderServiceError
+import time
 
 class Location(models.Model):
     address_line1 = models.CharField(max_length=255)
@@ -36,12 +38,45 @@ class Location(models.Model):
         parts.extend([self.city, self.state, self.postal_code, self.country])
         return ", ".join(parts)
 
-    def save(self, *args, **kwargs):
-        if not self.latitude or not self.longitude:
-            geolocator = Nominatim(user_agent="my_app")
-            full_address = self.get_full_address()
+    def geocode_address(self, attempt=1, max_attempts=3):
+        geolocator = Nominatim(user_agent="blood_management_system", timeout=10)
+        
+        full_address = f"{self.address_line1}, {self.city}, {self.state}, {self.postal_code}, {self.country}"
+        
+        try:
             location = geolocator.geocode(full_address)
+            
             if location:
                 self.latitude = location.latitude
                 self.longitude = location.longitude
+                print(f"Successfully geocoded: {full_address}")
+                return True
+            else:
+                print(f"Warning: Could not geocode address: {full_address}")
+                return False
+                
+        except GeocoderTimedOut:
+            if attempt < max_attempts:
+                print(f"Geocoding timeout, retry {attempt}/{max_attempts}")
+                time.sleep(2)
+                return self.geocode_address(attempt=attempt + 1, max_attempts=max_attempts)
+            else:
+                print(f"Geocoding failed after {max_attempts} attempts for: {full_address}")
+                return False
+                
+        except GeocoderServiceError as e:
+            print(f"Geocoding service error: {str(e)}")
+            return False
+            
+        except Exception as e:
+            print(f"Unexpected geocoding error: {str(e)}")
+            return False
+
+    def save(self, *args, **kwargs):
+        if not self.latitude or not self.longitude:
+            try:
+                self.geocode_address()
+            except Exception as e:
+                print(f"Failed to geocode during save: {str(e)}")
+        
         super().save(*args, **kwargs)
