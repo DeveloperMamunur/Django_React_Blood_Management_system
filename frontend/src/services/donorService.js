@@ -36,6 +36,7 @@ export const donorService = {
   async updateDonor(id, data) {
     try {
       const response = await api.put(`/donors/profiles/${id}/`, data);
+      console.log("Donor updated:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error updating donor:", error);

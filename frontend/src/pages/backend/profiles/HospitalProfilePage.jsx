@@ -6,12 +6,10 @@ import {
   MapPin,
   User,
   Phone,
-  FileText,
   Building2,
   Globe,
   Bed,
-  Shield,
-  Upload,
+  Shield
 } from "lucide-react";
 import { hospitalService } from "../../../services/hospitalService";
 
@@ -19,6 +17,7 @@ export default function HospitalProfilePage() {
   const [hospital, setHospital] = useState(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     location: {},
   });
@@ -72,6 +71,8 @@ export default function HospitalProfilePage() {
     } catch (error) {
       console.error("Error saving hospital profile:", error);
       alert("Error saving hospital profile. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -90,7 +91,7 @@ export default function HospitalProfilePage() {
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-gray-800 dark:to-gray-750 border-b border-gray-200 dark:border-gray-700 px-8 py-6">
+        <div className="bg-linear-to-r from-red-50 to-pink-50 dark:from-gray-800 dark:to-gray-750 border-b border-gray-200 dark:border-gray-700 px-8 py-6">
           <div className="flex items-center space-x-3">
             <div className="bg-red-600 dark:bg-red-500 p-3 rounded-xl shadow-md">
               <Building2 className="w-7 h-7 text-white" />
@@ -360,8 +361,8 @@ export default function HospitalProfilePage() {
                   col: "md:col-span-2",
                 },
                 {
-                  field: "address_line2",
-                  label: "Address Line 2",
+                  field: "police_station",
+                  label: "Police Station",
                   col: "md:col-span-2",
                 },
                 { field: "city", label: "City" },
@@ -397,9 +398,14 @@ export default function HospitalProfilePage() {
           <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-gray-700">
             <button
               type="submit"
-              className="flex items-center space-x-2 px-6 py-3 bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+              className="flex items-center space-x-2 px-6 py-3 bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-in-out"
             >
-              {creating ? (
+              {submitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>{creating ? "Creating..." : "Updating..."}</span>
+                </>
+              ) : creating ? (
                 <>
                   <PlusCircle className="w-5 h-5" />
                   <span>Create Profile</span>

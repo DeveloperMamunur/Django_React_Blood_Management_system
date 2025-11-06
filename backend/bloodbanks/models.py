@@ -3,12 +3,12 @@ from accounts.models import User
 from locations.models import Location
 
 class BloodBank(models.Model):
-    name = models.CharField(max_length=255)
-    registration_number = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=255, blank=True)
+    registration_number = models.CharField(max_length=100, unique=True, blank=True, null=True)
     location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True, blank=True, related_name='blood_banks')
-    contact_person = models.CharField(max_length=255)
-    contact_number = models.CharField(max_length=17)
-    email = models.EmailField()
+    contact_person = models.CharField(max_length=255, blank=True)
+    contact_number = models.CharField(max_length=17, blank=True)
+    email = models.EmailField(blank=True)
     operating_hours = models.CharField(max_length=100, default="24/7")
     storage_capacity = models.PositiveIntegerField(help_text="Maximum units that can be stored")
     managed_by = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name='managed_blood_banks')

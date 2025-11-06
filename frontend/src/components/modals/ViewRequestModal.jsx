@@ -104,11 +104,12 @@ export default function ViewRequestModal({ requestId, isOpen, onClose }) {
                   <td className="p-3 text-gray-800 dark:text-gray-200">Address</td>
                   <td className="p-3 text-gray-800 dark:text-gray-200">
                     {request?.location
-                      ? `${request.location.address_line1 || ""}, ${
-                          request.location.city || ""
-                        }, ${request.location.state || ""}, ${
-                          request.location.country || ""
-                        }, ${request.location.postal_code || ""}`
+                      ? `${request.location.address_line1 || ""}, 
+                        ${request.location.police_station || ""}, 
+                        ${request.location.city || ""}, 
+                        ${request.location.state || ""}, 
+                        ${request.location.country || ""}, 
+                        ${request.location.postal_code || ""}`
                       : "—"}
                   </td>
                 </tr>

@@ -271,7 +271,7 @@ class CurrentHospitalProfileView(generics.RetrieveUpdateAPIView):
             user=user,
             defaults={
                 "hospital_name": "",
-                "registration_number": "",
+                "registration_number": None,
                 "hospital_type": "",
                 "emergency_contact": "",
                 "website": "",

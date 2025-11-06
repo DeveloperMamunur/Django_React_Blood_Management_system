@@ -193,7 +193,7 @@ export default function Home() {
                   <div className="space-y-3 text-sm">
                     <div className="flex items-center space-x-2 dark:text-gray-400 text-gray-600">
                       <MapPin className="w-4 h-4 text-red-500" />
-                      <span>{campaign.address_line1}, {campaign.city}</span>
+                      <span>{campaign.address_line1},{campaign.police_station}, {campaign.city}</span>
                     </div>
                     <div className="flex items-center space-x-2 dark:text-gray-400 text-gray-600">
                       <Clock className="w-4 h-4 text-red-500" />

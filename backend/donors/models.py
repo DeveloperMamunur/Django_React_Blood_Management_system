@@ -25,14 +25,15 @@ class DonorProfile(models.Model):
     )
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='donor_profile')
-    blood_group = models.CharField(max_length=3, choices=BLOOD_GROUP_CHOICES)
-    date_of_birth = models.DateField(null=False, blank=False, default='1900-01-01')
+    blood_group = models.CharField(max_length=3, choices=BLOOD_GROUP_CHOICES, blank=True)
+    date_of_birth = models.DateField(null=False, blank=False, default='2000-01-01')
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     weight = models.DecimalField(
         max_digits=5,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('45.00'))],
-        help_text="Weight in kg (minimum 45kg)"
+        help_text="Weight in kg (minimum 45kg)",
+        blank=True, null=True
     )
     last_donation_date = models.DateField(null=True, blank=True)
     medical_conditions = models.TextField(

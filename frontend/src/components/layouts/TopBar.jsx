@@ -144,7 +144,12 @@ export default function TopBar() {
                             onClick={() => setShowProfile(!showProfile)}
                             className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all"
                         >
-                            <span className="text-sm font-semibold text-gray-700 dark:text-white">AD</span>
+                            <span className="text-sm font-semibold text-gray-700 dark:text-white">
+                                {currentUser?.first_name?.trim() && currentUser?.last_name?.trim()
+                                ? `${currentUser.first_name[0].toUpperCase()}${currentUser.last_name[0].toUpperCase()}`
+                                : currentUser?.username?.substring(0, 2).toUpperCase()
+                                }
+                            </span>
                         </button>
 
                         {showProfile && (

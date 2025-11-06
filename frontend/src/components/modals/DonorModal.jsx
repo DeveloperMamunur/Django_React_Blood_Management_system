@@ -83,9 +83,7 @@ export default function DonorModal({ donorId, isOpen, onClose }) {
                   <td className="p-3 text-gray-800 dark:text-gray-200">Location</td>
                   <td className="p-3 text-gray-700 dark:text-gray-300">
                     <span>{donor.location?.address_line1}, </span>
-                    {donor.location && donor.location.address_line2 && (
-                      <span>{donor.location.address_line2}, </span>
-                    )}
+                    <span>{donor.location?.police_station}, </span>
                     <span>{donor.location?.city}, </span> 
                     <span>{donor.location?.state}, </span>
                     <span>{donor.location?.country}, </span>

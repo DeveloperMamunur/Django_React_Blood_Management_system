@@ -47,7 +47,8 @@ class AdminProfile(models.Model):
             ('B+', 'B+'), ('B-', 'B-'),
             ('AB+', 'AB+'), ('AB-', 'AB-'),
             ('O+', 'O+'), ('O-', 'O-'),
-        )
+        ),
+        blank=True
     )
     location = models.ForeignKey(
         Location, on_delete=models.SET_NULL, null=True, related_name='admins'
@@ -78,7 +79,8 @@ class ReceiverProfile(models.Model):
             ('B+', 'B+'), ('B-', 'B-'),
             ('AB+', 'AB+'), ('AB-', 'AB-'),
             ('O+', 'O+'), ('O-', 'O-'),
-        )
+        ),
+        blank=True
     )
     location = models.ForeignKey(
         Location, on_delete=models.SET_NULL, null=True, related_name='receivers'
@@ -100,18 +102,19 @@ class ReceiverProfile(models.Model):
 
 class HospitalProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='hospital_profile')
-    hospital_name = models.CharField(max_length=255)
-    registration_number = models.CharField(max_length=100, unique=True)
+    hospital_name = models.CharField(max_length=255, blank=True)
+    registration_number = models.CharField(max_length=100, unique=True, blank=True, null=True)
     hospital_type = models.CharField(
         max_length=20,
         choices=(
             ('GOVERNMENT', 'Government'),
             ('PRIVATE', 'Private'),
             ('CHARITABLE', 'Charitable'),
-        )
+        ),
+        blank=True
     )
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
-    emergency_contact = models.CharField(max_length=17)
+    emergency_contact = models.CharField(max_length=17, blank=True)
     website = models.URLField(blank=True, null=True)
     has_blood_bank = models.BooleanField(default=False)
     bed_capacity = models.PositiveIntegerField(null=True, blank=True)

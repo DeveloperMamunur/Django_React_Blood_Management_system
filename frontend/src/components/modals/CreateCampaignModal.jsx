@@ -66,7 +66,7 @@ export default function CreateCampaignModal({ isOpen, onClose, campaignId, refre
             status: campaignData.status || "PLANNED",
             location: campaignData.location || {
               address_line1: "",
-              address_line2: "",
+              police_station: "",
               city: "",
               state: "",
               postal_code: "",
@@ -144,7 +144,7 @@ export default function CreateCampaignModal({ isOpen, onClose, campaignId, refre
         status: "PLANNED",
         location: {
           address_line1: "",
-          address_line2: "",
+          police_station: "",
           city: "",
           state: "",
           postal_code: "",
@@ -307,8 +307,8 @@ export default function CreateCampaignModal({ isOpen, onClose, campaignId, refre
                   col: "md:col-span-2",
                 },
                 {
-                  field: "address_line2",
-                  label: "Address Line 2",
+                  field: "police_station",
+                  label: "Police Station",
                   col: "md:col-span-2",
                 },
                 { field: "city", label: "City" },

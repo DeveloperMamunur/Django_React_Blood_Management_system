@@ -99,9 +99,7 @@ export default function HospitalModal({ hospitalId, isOpen, onClose }) {
                   <td className="p-3 text-gray-800 dark:text-gray-200">Location</td>
                   <td className="p-3 text-gray-700 dark:text-gray-300">
                     <span>{hospital.location?.address_line1}, </span>
-                    {hospital.location && hospital.location.address_line2 && (
-                      <span>{hospital.location.address_line2}, </span>
-                    )}
+                    <span>{hospital.location?.police_station}, </span>
                     <span>{hospital.location?.city}, </span> 
                     <span>{hospital.location?.state}, </span>
                     <span>{hospital.location?.country}, </span>

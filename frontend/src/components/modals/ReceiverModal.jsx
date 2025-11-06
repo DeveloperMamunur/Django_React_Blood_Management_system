@@ -89,9 +89,7 @@ export default function ReceiverModal({ receiverId, isOpen, onClose }) {
                   <td className="p-3 text-gray-800 dark:text-gray-200">Location</td>
                   <td className="p-3 text-gray-700 dark:text-gray-300">
                     <span>{receiver.location?.address_line1}, </span>
-                    {receiver.location && receiver.location.address_line2 && (
-                      <span>{receiver.location.address_line2}, </span>
-                    )}
+                    <span>{receiver.location?.police_station}, </span>
                     <span>{receiver.location?.city}, </span> 
                     <span>{receiver.location?.state}, </span>
                     <span>{receiver.location?.country}, </span>

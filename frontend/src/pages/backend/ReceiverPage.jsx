@@ -80,7 +80,7 @@ export default function ReceiverPage() {
                   <td className="p-3 text-gray-700 dark:text-gray-200">{receiver?.user.phone_number || "—"}</td>
                   <td className="p-3 text-gray-700 dark:text-gray-200">
                     {receiver?.location
-                      ? `${receiver.location?.address_line1 || ""}, ${receiver.location?.city || ""}, ${receiver.location?.state || ""}`
+                      ? `${receiver.location?.address_line1 || ""}, ${receiver.location?.police_station || ""}, ${receiver.location?.city || ""}, ${receiver.location?.state || ""}`
                       : "N/A"}
                   </td>
                   <td className="p-3 text-gray-700 dark:text-gray-200">{receiver?.blood_group || "—"}</td>

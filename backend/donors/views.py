@@ -37,13 +37,13 @@ class CurrentDonorProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         user = self.request.user
-        donor_profile, created = DonorProfile.objects.get_or_create(
+        donor_profile, _ = DonorProfile.objects.get_or_create(
             user=user,
             defaults={
-                "date_of_birth": "1900-01-01",
+                "date_of_birth": "2000-01-01",
                 "blood_group": "",
                 "gender": "M",
-                "weight": 0.0,
+                "weight": None,
                 "last_donation_date": None,
                 "medical_conditions": "",
                 "is_available": True,
@@ -51,14 +51,6 @@ class CurrentDonorProfileView(generics.RetrieveUpdateAPIView):
                 "profile_photo": None,
                 "bio": "",
                 "willing_to_travel_km": 10,
-                "preferred_donation_time": "ANYTIME",
-                "total_donations": 0,
-                "donation_points": 0,
-                "is_verified": False,
-                "verified_at": None,
-                "verified_by": None,
-                "created_at": None,
-                "updated_at": None,
             }
         )
         return donor_profile

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, MapPin, CheckCircle, ExternalLink, Clock, XCircle } from 'lucide-react';
+import { Calendar, MapPin, CheckCircle, ExternalLink, Clock, XCircle, UserPlus} from 'lucide-react';
 import { campaignService } from '../../services/campaignService';
 import { donorService } from '../../services/donorService';
 
@@ -95,6 +95,28 @@ export default function Dashboard() {
               <p className="text-gray-600 dark:text-gray-400">Loading campaigns...</p>
             </div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentDonor) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-md text-center">
+          <UserPlus className="mx-auto text-red-500 dark:text-red-400 mb-4" size={48} />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Create Your Donor Profile
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            You need to create a donor profile before viewing campaigns.
+          </p>
+          <Link
+            to="/dashboard/donor/profile"
+            className="px-4 py-2 bg-red-500 dark:bg-red-600 text-white rounded-lg hover:bg-red-600 dark:hover:bg-red-500 transition-colors"
+          >
+            Create Profile
+          </Link>
         </div>
       </div>
     );

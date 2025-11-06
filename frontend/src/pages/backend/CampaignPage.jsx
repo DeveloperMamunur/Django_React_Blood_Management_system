@@ -133,7 +133,7 @@ export default function CampaignPage() {
                   </td>
                   <td className="p-3 text-gray-700 dark:text-gray-200">
                     {campaign.location
-                      ? `${campaign.location.city}, ${campaign.location.state}`
+                      ? `${campaign.location.police_station}, ${campaign.location.city}, ${campaign.location.state}`
                       : "N/A"}
                   </td>
                   <td className="p-3 text-gray-700 dark:text-gray-200">

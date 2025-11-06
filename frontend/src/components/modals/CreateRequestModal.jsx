@@ -284,7 +284,7 @@ export default function CreateRequestModal({ isOpen, onClose, onSuccess, request
           <div>
             <h3 className="text-sm font-semibold mb-2 dark:text-gray-200">Location</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {["address_line1","address_line2","city","state","postal_code","country"].map((field) => (
+              {["address_line1","police_station","city","state","postal_code","country"].map((field) => (
                 <div key={field}>
                   <label className="block text-xs font-medium dark:text-gray-300">{field.replace("_"," ").toUpperCase()}</label>
                   <input
@@ -292,7 +292,8 @@ export default function CreateRequestModal({ isOpen, onClose, onSuccess, request
                     name={field}
                     value={formData.location[field] || ""}
                     onChange={handleLocationChange}
-                    className={`w-full mt-1 p-2 border rounded-md dark:border-gray-600 dark:text-gray-200 ${!!formData.hospital ? 'bg-gray-100 dark:bg-gray-700' : 'dark:bg-gray-800'}`}
+                    className={`w-full mt-1 p-2 border rounded-md dark:border-gray-600 dark:text-gray-200 
+                      ${!!formData.hospital ? 'bg-gray-100 dark:bg-gray-700' : 'dark:bg-gray-800'}`}
                     readOnly={!!formData.hospital}
                     required
                   />

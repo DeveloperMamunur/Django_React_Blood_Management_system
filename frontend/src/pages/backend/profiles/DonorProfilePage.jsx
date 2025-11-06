@@ -16,6 +16,7 @@ export default function DonorProfilePage() {
   const [donor, setDonor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     location: {},
   });
@@ -53,11 +54,16 @@ export default function DonorProfilePage() {
     try {
       if (creating) {
         await donorService.createDonor(formData);
+        alert("Donor profile created successfully!");
       } else {
         await donorService.updateDonor(donor.id, formData);
+        alert("Donor profile updated successfully!");
       }
     } catch (error) {
+      console.log(error.response?.data);
       console.error("Error saving donor profile:", error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -76,7 +82,7 @@ export default function DonorProfilePage() {
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-gray-800 dark:to-gray-750 border-b border-gray-200 dark:border-gray-700 px-8 py-6">
+        <div className="bg-linear-to-r from-red-50 to-pink-50 dark:from-gray-800 dark:to-gray-750 border-b border-gray-200 dark:border-gray-700 px-8 py-6">
           <div className="flex items-center space-x-3">
             <div className="bg-red-600 dark:bg-red-500 p-3 rounded-xl shadow-md">
               <Droplet className="w-7 h-7 text-white" />
@@ -159,6 +165,7 @@ export default function DonorProfilePage() {
                         setFormData({ ...formData, blood_group: e.target.value })
                       }
                       className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-transparent transition-colors"
+                      required
                     >
                       <option value="">Select Blood Group</option>
                       {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(
@@ -189,6 +196,7 @@ export default function DonorProfilePage() {
                         })
                       }
                       className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-transparent transition-colors"
+                      required
                     />
                   </div>
                 </div>
@@ -204,6 +212,7 @@ export default function DonorProfilePage() {
                       setFormData({ ...formData, gender: e.target.value })
                     }
                     className="w-full px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-transparent transition-colors"
+                    required
                   >
                     <option value="">Select Gender</option>
                     <option value="M">Male</option>
@@ -227,6 +236,7 @@ export default function DonorProfilePage() {
                       }
                       placeholder="Enter weight"
                       className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-transparent transition-colors"
+                      required
                     />
                   </div>
                 </div>
@@ -259,6 +269,7 @@ export default function DonorProfilePage() {
                       })
                     }
                     className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-transparent transition-colors"
+                    required
                   />
                 </div>
               </div>
@@ -277,6 +288,7 @@ export default function DonorProfilePage() {
                     })
                   }
                   className="w-full px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-transparent transition-colors"
+                  required
                 >
                   <option value="">Select Time</option>
                   <option value="MORNING">Morning (8AM-12PM)</option>
@@ -309,6 +321,7 @@ export default function DonorProfilePage() {
                   rows="3"
                   placeholder="List any medical conditions or allergies..."
                   className="w-full px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-transparent transition-colors resize-none"
+                  required
                 />
               </div>
 
@@ -341,19 +354,20 @@ export default function DonorProfilePage() {
               {[
                 {
                   field: "address_line1",
-                  label: "Address Line 1",
+                  label: "Address",
                   col: "md:col-span-2",
+                  required: true,
                 },
                 {
-                  field: "address_line2",
-                  label: "Address Line 2",
+                  field: "police_station",
+                  label: "Police Station",
                   col: "md:col-span-2",
                 },
-                { field: "city", label: "City" },
-                { field: "state", label: "State" },
-                { field: "postal_code", label: "Postal Code" },
-                { field: "country", label: "Country" },
-              ].map(({ field, label, col }) => (
+                { field: "city", label: "City", required: true },
+                { field: "state", label: "State", required: true },
+                { field: "postal_code", label: "Postal Code", required: true },
+                { field: "country", label: "Country", required: true },
+              ].map(({ field, label, col, required }) => (
                 <div key={field} className={col}>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {label}
@@ -372,6 +386,7 @@ export default function DonorProfilePage() {
                     }
                     placeholder={`Enter ${label.toLowerCase()}`}
                     className="w-full px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-transparent transition-colors"
+                    required={required}
                   />
                 </div>
               ))}
@@ -382,9 +397,14 @@ export default function DonorProfilePage() {
           <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-gray-700">
             <button
               type="submit"
-              className="flex items-center space-x-2 px-6 py-3 bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+              className="flex items-center space-x-2 px-6 py-3 bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white font-medium rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-in-out"
             >
-              {creating ? (
+              {submitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>{creating ? "Creating..." : "Updating..."}</span>
+                </>
+              ) : creating ? (
                 <>
                   <PlusCircle className="w-5 h-5" />
                   <span>Create Profile</span>

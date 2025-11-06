@@ -36,6 +36,7 @@ export default function Sidebar() {
     { id: 7, link: "/dashboard/requests", name: "Requests", icon: FileText, roles: ["ADMIN", "RECEIVER", "HOSPITAL", "DONOR"] },
     { id: 8, link: "/dashboard/campaigns", name: "Campaigns", icon: Megaphone, roles: ["ADMIN", "BLOOD_BANK"] },
     { id: 9, link: "/dashboard/reports", name: "Reports", icon: BarChart3, roles: ["ADMIN"]},
+    { id: 10, link: "/dashboard/blood-banks/inventory", name: "Inventory", icon: Package, roles: ["ADMIN"] },
   ];
 
   const handleLogout = () => {

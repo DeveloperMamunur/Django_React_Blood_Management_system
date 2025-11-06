@@ -79,12 +79,12 @@ export default function BloodBankPage() {
                   <td className="p-3 text-gray-700 dark:text-gray-200">{bloodBank?.managed_by.phone_number || "—"}</td>
                   <td className="p-3 text-gray-700 dark:text-gray-200">
                     {bloodBank?.location
-                      ? `${bloodBank.location?.address_line1 || ""}, ${bloodBank.location?.city || ""}, ${bloodBank.location?.state || ""}`
+                      ? `${bloodBank.location?.address_line1 || ""}, ${bloodBank.location?.police_station || ""},${bloodBank.location?.city || ""}, ${bloodBank.location?.state || ""}`
                       : "N/A"}
                   </td>
                   <td className="p-3 text-gray-700 dark:text-gray-200 flex gap-2">
                     <Button variant="primary" size="xs" onClick={() => {handleView(bloodBank.id)}}><Eye className="h-5 w-5" /> View</Button>
-                    <Link to={`/blood-banks/${bloodBank.id}/inventory`} className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-4 rounded text-nowrap"><Package className="h-5 w-5" /> Inventory</Link>
+                    <Link to={`/dashboard/blood-banks/${bloodBank.id}/inventory`} className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-4 rounded text-nowrap"><Package className="h-5 w-5" /> Inventory</Link>
                     <Button variant="danger" size="xs" onClick={() => handleDelete(bloodBank.id)}>Delete</Button>
 
                   </td>

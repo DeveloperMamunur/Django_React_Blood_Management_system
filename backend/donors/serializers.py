@@ -17,7 +17,7 @@ class DonorProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = DonorProfile
         fields = '__all__'
-        read_only_fields = ['user', 'total_donations', 'donation_points', 'is_verified', 'verified_at', 'verified_by']
+        read_only_fields = ['user', 'is_verified', 'verified_at', 'verified_by']
 
     def get_can_donate(self, obj):
         return obj.is_available and obj.can_donate()
@@ -32,24 +32,32 @@ class DonorProfileSerializer(serializers.ModelSerializer):
         location_data = validated_data.pop('location', None)
         location = None
         if location_data:
-            location = Location.objects.get_or_create(**location_data)
+            location_serializer = LocationSerializer(data=location_data)
+            location_serializer.is_valid(raise_exception=True)
+            location = location_serializer.save()
 
-        donor, created = DonorProfile.objects.update_or_create(
+        donor = DonorProfile.objects.create(
             user=user,
-            defaults={**validated_data, 'location': location}
+            location=location,
+            **validated_data
         )
         return donor
 
     def update(self, instance, validated_data):
         location_data = validated_data.pop('location', None)
+
         if location_data:
             if instance.location:
-                for attr, value in location_data.items():
-                    setattr(instance.location, attr, value)
-                instance.location.save()
+                location_serializer = LocationSerializer(
+                    instance.location, data=location_data, partial=True
+                )
+                location_serializer.is_valid(raise_exception=True)
+                location_serializer.save()
             else:
-                instance.location = Location.objects.get_or_create(**location_data)
-
+                location_serializer = LocationSerializer(data=location_data)
+                location_serializer.is_valid(raise_exception=True)
+                instance.location = location_serializer.save()
+        
         request = self.context.get('request')
         user_data = request.data.get('user') if request else None
         if user_data:

@@ -102,9 +102,7 @@ export default function BloodBankModal({ bloodBankId, isOpen, onClose }) {
                   <td className="p-3 text-gray-800 dark:text-gray-200">Location</td>
                   <td className="p-3 text-gray-700 dark:text-gray-300">
                     <span>{bloodBank.location?.address_line1}, </span>
-                    {bloodBank.location && bloodBank.location.address_line2 && (
-                      <span>{bloodBank.location.address_line2}, </span>
-                    )}
+                    <span>{bloodBank.location?.police_station}, </span>
                     <span>{bloodBank.location?.city}, </span> 
                     <span>{bloodBank.location?.state}, </span>
                     <span>{bloodBank.location?.country}, </span>

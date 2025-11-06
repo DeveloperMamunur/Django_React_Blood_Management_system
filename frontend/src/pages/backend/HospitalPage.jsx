@@ -76,7 +76,7 @@ export default function HospitalPage() {
                   <td className="p-3 text-gray-700 dark:text-gray-200">{hospital?.user.phone_number || "—"}</td>
                   <td className="p-3 text-gray-700 dark:text-gray-200">
                     {hospital?.location
-                      ? `${hospital.location?.address_line1 || ""}, ${hospital.location?.city || ""}, ${hospital.location?.state || ""}`
+                      ? `${hospital.location?.address_line1 || ""}, ${hospital.location?.police_station || ""}, ${hospital.location?.city || ""}, ${hospital.location?.state || ""}`
                       : "N/A"}
                   </td>
                   <td className="p-3 text-gray-700 dark:text-gray-200 flex gap-2">

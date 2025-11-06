@@ -81,9 +81,10 @@ export default function CreateBloodInventoryModal({
         await bloodBankService.createBloodInventory(bloodBankId, formData);
       }
 
-      if (onSuccess) onSuccess(); // reload list
+      if (onSuccess) onSuccess();
       onClose();
     } catch (err) {
+      console.log(err.response?.data);
       console.error("Error saving inventory:", err);
     } finally {
       setLoading(false);

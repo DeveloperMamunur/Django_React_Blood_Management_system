@@ -125,7 +125,7 @@ export default function RequestPage() {
                   <td className="p-3 text-gray-700 dark:text-gray-200">{request?.blood_group || "—"}</td>
                   <td className="p-3 text-gray-700 dark:text-gray-200">
                     {request?.location
-                      ? `${request.location?.address_line1 || ""}, ${request.location?.city || ""}, ${request.location?.state || ""}`
+                      ? `${request.location?.address_line1 || ""}, ${request.location?.police_station || ""}, ${request.location?.city || ""}, ${request.location?.state || ""}`
                       : "N/A"}
                   </td>
                   <td className="p-3 text-gray-700 dark:text-gray-200">{getStatusBadge(request.status)}</td>

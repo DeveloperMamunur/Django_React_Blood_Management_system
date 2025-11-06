@@ -68,7 +68,7 @@ export default function CampaignModal({ campaignId, isOpen, onClose }) {
                   <td className="p-3 font-semibold">Location</td>
                   <td className="p-3">
                     {campaign.location
-                      ? `${campaign.location.address_line1}, ${campaign.location.city}, ${campaign.location.state}`
+                      ? `${campaign.location.address_line1}, ${campaign.location.police_station}, ${campaign.location.city}, ${campaign.location.state}`
                       : "N/A"}
                   </td>
                 </tr>

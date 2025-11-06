@@ -58,6 +58,7 @@ function App() {
                   <Route path="/dashboard/hospitals" element={<HospitalsPage />} />
                   <Route path="/dashboard/blood-banks" element={<BloodBankPage />} />
                   <Route path="/dashboard/blood-banks/:bloodBankId/inventory" element={<BloodInventoryPage />} />
+                  <Route path="/dashboard/blood-banks/inventory" element={<BloodInventoryPage />} />
                   <Route path="/dashboard/receivers" element={<ReceiverPage />} />
                   <Route path="/dashboard/requests" element={<RequestPage />} />
                   <Route path="/dashboard/campaigns" element={<CampaignPage />} />
