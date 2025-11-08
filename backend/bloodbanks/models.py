@@ -2,6 +2,7 @@ from django.db import models
 from accounts.models import User
 from locations.models import Location
 
+
 class BloodBank(models.Model):
     name = models.CharField(max_length=255, blank=True)
     registration_number = models.CharField(max_length=100, unique=True, blank=True, null=True)
@@ -20,7 +21,12 @@ class BloodBank(models.Model):
         db_table = 'blood_banks'
     
     def __str__(self):
-        return f"{self.name} - {self.location.city}"
+        return f"{self.name} - {self.city_country()}"
+
+    def city_country(self):
+        if self.location:
+            return f"{self.location.city}, {self.location.country}"
+        return "No Location"
     
     def get_total_units(self):
         return self.inventory.aggregate(

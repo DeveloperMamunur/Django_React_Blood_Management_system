@@ -145,15 +145,24 @@ class PasswordChangeSerializer(serializers.Serializer):
         user.save()
         return user
 
+# -----------------------------
+# User Serializer
+# -----------------------------
+class CreatedBySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'role']
+
 class UserSerializer(serializers.ModelSerializer):
+    created_by = CreatedBySerializer(read_only=True)
     class Meta:
         model = User
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name', 
             'role', 'phone_number', 'is_active_account', 'email_verified',
-            'created_at', 'updated_at',
+            'created_at', 'updated_at', 'created_by'
         ]
-
+        read_only_fields = ['created_by']
 
 # -----------------------------
 # Admin Profile Serializer
@@ -161,14 +170,21 @@ class UserSerializer(serializers.ModelSerializer):
 class AdminProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     location = LocationSerializer(required=False, allow_null=True)
+    full_name = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = AdminProfile
         fields = '__all__'
 
+    def get_full_name(self, obj):
+        return obj.full_name()
+
     def create(self, validated_data):
         request = self.context.get('request')
         user = request.user if request else None
+
+        if user and user.role != 'ADMIN':
+            raise serializers.ValidationError("Only users with ADMIN can create admin profiles.")
 
         location_data = validated_data.pop('location', None)
         location = None
@@ -192,6 +208,14 @@ class AdminProfileSerializer(serializers.ModelSerializer):
             else:
                 instance.location = Location.objects.create(**location_data)
 
+        request = self.context.get('request')
+        user_data = request.data.get('user') if request else None
+        if user_data:
+            for attr in ['first_name', 'last_name', 'phone_number']:
+                if attr in user_data:
+                    setattr(instance.user, attr, user_data[attr])
+            instance.user.save()
+
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
@@ -213,6 +237,9 @@ class ReceiverProfileSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context.get('request')
         user = request.user if request and request.user.is_authenticated else None
+
+        if user and user.role != 'RECEIVER':
+            raise serializers.ValidationError("Only users with RECEIVER can create receiver profiles.")
 
         location_data = validated_data.pop('location', None)
         location = None
@@ -267,6 +294,9 @@ class HospitalProfileSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         user = request.user if request and request.user.is_authenticated else None
 
+        if user and user.role != 'HOSPITAL':
+            raise serializers.ValidationError("Only users with HOSPITAL can create hospital profiles.")
+            
         location_data = validated_data.pop('location', None)
         location = None
         if location_data:

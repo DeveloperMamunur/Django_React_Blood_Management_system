@@ -18,13 +18,38 @@ import {
 import { Link, useLocation } from "react-router-dom";
 import { useSidebar } from "../../hooks/useSidebar";
 import { useAuth } from "../../hooks/useAuth";
+import { useEffect, useState } from "react";
+import { bloodBankService } from "../../services/bloodBankService";
 
 export default function Sidebar() {
   const location = useLocation();
   const { sidebarOpen, closeSidebar } = useSidebar();
   const { currentUser, logout } = useAuth();
+  const [bloodBankId, setBloodBankId] = useState(null);
+  const [bloodBank, setBloodBank] = useState(null);
 
   const role = currentUser?.role || '';
+  useEffect(() => {
+    if (role === 'BLOOD_BANK') {
+      const fetchBloodBank = async () => {
+        try {
+          const data = await bloodBankService.currentBloodBank();
+          setBloodBank(data.results || data);
+        } catch (error) {
+          console.error("Failed to fetch blood bank:", error);
+        }
+      };
+      fetchBloodBank();
+    }
+  }, [role]);
+
+  useEffect(() => {
+    if (bloodBank && role === 'BLOOD_BANK') {
+      setBloodBankId(bloodBank.id);
+    }
+  }, [bloodBank, role]);
+
+
 
   const navItems = [
     { id: 1, link: "/dashboard", name: "Dashboard", icon: LayoutDashboard, roles: ["ADMIN", "RECEIVER", "HOSPITAL", "BLOOD_BANK", "DONOR"] },
@@ -36,7 +61,7 @@ export default function Sidebar() {
     { id: 7, link: "/dashboard/requests", name: "Requests", icon: FileText, roles: ["ADMIN", "RECEIVER", "HOSPITAL", "DONOR"] },
     { id: 8, link: "/dashboard/campaigns", name: "Campaigns", icon: Megaphone, roles: ["ADMIN", "BLOOD_BANK"] },
     { id: 9, link: "/dashboard/reports", name: "Reports", icon: BarChart3, roles: ["ADMIN"]},
-    { id: 10, link: "/dashboard/blood-banks/inventory", name: "Inventory", icon: Package, roles: ["ADMIN"] },
+    { id: 10, link: `/dashboard/blood-banks/${bloodBankId}/inventory`, name: "Inventory", icon: Package, roles: ["BLOOD_BANK"] },
   ];
 
   const handleLogout = () => {

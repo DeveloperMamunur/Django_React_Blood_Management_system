@@ -34,10 +34,14 @@ class BloodBankSerializer(serializers.ModelSerializer):
     location = LocationSerializer(required=False, allow_null=True)
     managed_by = UserSerializer(read_only=True)
     inventory = serializers.SerializerMethodField(read_only=True)
+    city_country = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = BloodBank
         fields = '__all__'
+
+    def get_city_country(self, obj):
+        return obj.city_country()
 
     def get_inventory(self, obj):
         if hasattr(obj, "inventory"):
@@ -53,6 +57,10 @@ class BloodBankSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context.get("request")
         user = request.user if request else None
+        if user and user.role != 'BLOOD_BANK':
+            raise serializers.ValidationError(
+                "Only users with BLOOD_BANK can create blood banks"
+            )
 
         location_data = validated_data.pop("location", None)
         location = None

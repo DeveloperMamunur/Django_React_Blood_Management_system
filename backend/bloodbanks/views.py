@@ -18,7 +18,9 @@ class BloodBankListCreateView(generics.ListCreateAPIView):
         user = self.request.user
         if user.is_superuser or user.role == 'ADMIN':
             return BloodBank.objects.all()
-        return BloodBank.objects.filter(managed_by=user, managed_by__role='HOSPITAL')
+        if user.role == 'BLOOD_BANK':
+            return BloodBank.objects.filter(managed_by=user)
+        return BloodBank.objects.none()
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -46,6 +48,9 @@ class CurrentBloodBankView(generics.RetrieveAPIView):
 
     def get_object(self):
         user = self.request.user
+        if user.role != 'BLOOD_BANK':
+            raise PermissionDenied("Only BLOOD_BANK users can have a blood bank profile.")
+
         blood_bank, created = BloodBank.objects.get_or_create(
             managed_by=user,
             defaults={

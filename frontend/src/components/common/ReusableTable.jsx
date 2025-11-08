@@ -83,6 +83,34 @@ export default function ReusableTable({
     });
   }
 
+  // Render cell content based on column type
+  function renderCell(col, row) {
+    const value = row[col.key];
+    
+    // If column has custom render function, use it
+    if (col.render) {
+      return col.render(row);
+    }
+    
+    // If column type is boolean, render badge
+    if (col.type === "boolean") {
+      return (
+        <span
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            value
+              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+              : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+          }`}
+        >
+          {value ? "Active" : "Inactive"}
+        </span>
+      );
+    }
+    
+    // Default rendering
+    return value ?? "-";
+  }
+
   return (
     <div className={`w-full transition-colors duration-200 ${className}`}>
       {/* Toolbar */}
@@ -218,24 +246,30 @@ export default function ReusableTable({
                       col.cellClass || ""
                     }`}
                   >
-                    {col.render ? col.render(row) : row[col.key] ?? "-"}
+                    {renderCell(col, row)}
                   </td>
                 ))}
                 {actions?.length > 0 && (
                   <td className="px-4 py-3 flex gap-2">
-                    {actions.map((action, i) => (
-                      <button
-                        key={i}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          action.onClick(row);
-                        }}
-                        className={`px-2 py-1 rounded-md text-sm border transition 
-                          ${action.className || "text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-800"}`}
-                      >
-                        {action.icon ? <span className="inline-flex items-center gap-1">{action.icon}{action.label}</span> : action.label}
-                      </button>
-                    ))}
+                    {actions.map((action, i) => {
+                      const icon = typeof action.icon === 'function' ? action.icon(row) : action.icon;
+                      const className = typeof action.className === 'function' ? action.className(row) : action.className;
+                      const label = typeof action.label === 'function' ? action.label(row) : action.label;
+                      
+                      return (
+                        <button
+                          key={i}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            action.onClick(row);
+                          }}
+                          className={`px-2 py-1 rounded-md text-sm border transition 
+                            ${className || "text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-800"}`}
+                        >
+                          {icon ? <span className="inline-flex items-center gap-1">{icon}{label}</span> : label}
+                        </button>
+                      );
+                    })}
                   </td>
                 )}
 

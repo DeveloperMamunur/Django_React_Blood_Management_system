@@ -28,6 +28,9 @@ class DonorProfileSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context.get('request')
         user = request.user if request and request.user.is_authenticated else None
+        
+        if user and user.role != 'DONOR':
+            raise serializers.ValidationError("Only users with DONOR can create donor profiles.")
 
         location_data = validated_data.pop('location', None)
         location = None

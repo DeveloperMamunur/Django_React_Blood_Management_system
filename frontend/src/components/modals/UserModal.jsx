@@ -69,12 +69,12 @@ export default function UserDetailsModal({ user, isOpen, onClose }) {
                   <span
                     className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full 
                     ${
-                      user.is_active
+                      user.is_active_account
                         ? "bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-200"
                         : "bg-red-100 text-red-700 dark:bg-red-800 dark:text-red-200"
                     }`}
                   >
-                    {user.is_active ? "Active" : "Inactive"}
+                    {user.is_active_account ? "Active" : "Inactive"}
                   </span>
                 </td>
               </tr>

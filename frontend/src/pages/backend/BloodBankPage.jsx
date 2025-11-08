@@ -28,8 +28,8 @@ export default function BloodBankPage() {
 
 
   const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this donor?")) {
-      console.log("Deleting Hospital ID:", id);
+    if (window.confirm("Are you sure you want to delete this Blood Bank?")) {
+      console.log("Deleting Blood Bank ID:", id);
       // Add delete API call here later
     }
   };
@@ -84,8 +84,8 @@ export default function BloodBankPage() {
                   </td>
                   <td className="p-3 text-gray-700 dark:text-gray-200 flex gap-2">
                     <Button variant="primary" size="xs" onClick={() => {handleView(bloodBank.id)}}><Eye className="h-5 w-5" /> View</Button>
-                    <Link to={`/dashboard/blood-banks/${bloodBank.id}/inventory`} className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-4 rounded text-nowrap"><Package className="h-5 w-5" /> Inventory</Link>
-                    <Button variant="danger" size="xs" onClick={() => handleDelete(bloodBank.id)}>Delete</Button>
+                    <Link to={`/dashboard/blood-banks/${bloodBank.id}/inventory`} className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-4 rounded text-nowrap"><Package className="h-5 w-5" />Inventory</Link>
+                    <Button variant="danger" size="xs" onClick={() => handleDelete(bloodBank.id)}><Trash2 className="h-5 w-5" />Delete</Button>
 
                   </td>
                 </tr>

@@ -28,6 +28,7 @@ import HospitalProfilePage from "./pages/backend/profiles/HospitalProfilePage.js
 import BloodBankProfilePage from "./pages/backend/profiles/BloodBankProfilePage.jsx";
 import CampaignRegister from "./pages/auth/CampaignRegister.jsx";
 import CampaignDonorListPage from "./pages/backend/CampaignDonorListPage.jsx";
+import AdminProfilePage from "./pages/backend/profiles/AdminProfilePage.jsx";
 
 function App() {
   return (
@@ -63,6 +64,7 @@ function App() {
                   <Route path="/dashboard/requests" element={<RequestPage />} />
                   <Route path="/dashboard/campaigns" element={<CampaignPage />} />
                   <Route path="/dashboard/reports" element={<ReportPage />} />
+                  <Route path="/dashboard/admin/profile" element={<AdminProfilePage />} />
                   <Route path="/dashboard/donor/profile" element={<DonorProfilePage />} />
                   <Route path="/dashboard/receiver/profile" element={<ReceiverProfilePage />} />
                   <Route path="/dashboard/hospital/profile" element={<HospitalProfilePage />} />

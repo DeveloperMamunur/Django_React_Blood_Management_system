@@ -1,6 +1,7 @@
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework.permissions import IsAuthenticated
@@ -124,18 +125,54 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 class UserListCreateView(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    # permission_classes = [permissions.IsAdminUser]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser or user.role == 'ADMIN':
+            return User.objects.all()
+        return User.objects.filter(id=user.id)
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if not (user.is_superuser or user.role == 'ADMIN'):
+            raise PermissionDenied("Only admins can create new users.")
+        role = self.request.data.get('role')
+        if role == 'ADMIN':
+            raise PermissionDenied("Cannot create another admin user.")
+        serializer.save(created_by=user)
 
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
-        if self.request.is_superuser or self.request.user.role == 'ADMIN':
+        user = self.request.user
+        if user.is_superuser or user.role == 'ADMIN':
             return self.get_queryset().get(pk=self.kwargs['pk'])
-        return self.request.user
+        return user
+
+    def perform_update(self, serializer):
+        user = self.request.user
+        target_user = self.get_object()
+        if not (user.is_superuser or user.role == 'ADMIN'):
+            if target_user != user:
+                raise PermissionDenied("You can only update your own profile.")
+            
+            allowed_fields = {'first_name', 'last_name', 'email', 'phone_number'}
+            for field in list(serializer.validated_data.keys()):
+                if field not in allowed_fields:
+                    serializer.validated_data.pop(field)
+        
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        user = self.request.user
+        if not (user.is_superuser or user.role == 'ADMIN'):
+            raise PermissionDenied("Only admins can delete users.")
+        instance.delete()
 
 # -----------------------------
 # Admin Profiles
@@ -147,7 +184,7 @@ class AdminProfileListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'ADMIN':
+        if user.role == 'ADMIN' or user.is_superuser:
             return AdminProfile.objects.all()
         return AdminProfile.objects.filter(user=user)
 
@@ -167,6 +204,30 @@ class AdminProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
         if self.request.is_superuser or self.request.user.role == 'ADMIN':
             return self.get_queryset().get(pk=self.kwargs['pk'])
         return self.request.user.admin_profile
+
+class CurrentAdminProfileView(generics.RetrieveAPIView):
+    queryset = AdminProfile.objects.all()
+    serializer_class = AdminProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        user = self.request.user
+        if user.role != 'ADMIN':
+            raise PermissionDenied("Only ADMIN users can have an admin profile.")
+        admin_profile, created = AdminProfile.objects.get_or_create(
+            user=user,
+            defaults={
+                "age": 0,
+                "blood_group": "",
+                "contact_number": "",
+                "emergency_contact": "",
+                "notes": "",
+                "location": None,
+                "created_at": None,
+                "updated_at": None,
+            },
+        )
+        return admin_profile
 
 # -----------------------------
 # Receiver Profiles
@@ -209,6 +270,8 @@ class CurrentReceiverProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         user = self.request.user
+        if user.role != 'RECEIVER':
+            raise PermissionDenied("Only RECEIVER users can have a receiver profile.")
         receiver_profile, created = ReceiverProfile.objects.get_or_create(
             user=user,
             defaults={
@@ -267,6 +330,9 @@ class CurrentHospitalProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         user = self.request.user
+        if user.role != 'HOSPITAL':
+            raise PermissionDenied("Only HOSPITAL users can have a hospital profile.")
+
         hospital_profile, created = HospitalProfile.objects.get_or_create(
             user=user,
             defaults={

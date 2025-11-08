@@ -31,6 +31,10 @@ export default function CreateBloodInventoryModal({
     if (isEdit) {
       (async () => {
         setLoading(true);
+        if (!bloodBankId) {
+          console.error("bloodBankId is undefined!");
+          return;
+        }
         try {
           const res = await bloodBankService.getBloodInventoryById(
             bloodBankId,

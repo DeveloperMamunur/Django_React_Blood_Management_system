@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "../../components/ui";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, PenBox, Plus, Trash2 } from "lucide-react";
 import { bloodBankService } from "../../services/bloodBankService";
 import CreateBloodInventoryModal from "../../components/modals/CreateBloodInventoryModal";
 
@@ -29,13 +29,10 @@ export default function BloodInventoryPage() {
         setLoading(false);
       }
     };
-    useEffect(() => {
-      if (!bloodBankId) return;
 
-      fetchBloods();
-    }, [bloodBankId]);
-
-
+  useEffect(() => {
+    fetchBloods();
+  }, []);
 
 
   const handleDelete = (id) => {
@@ -68,9 +65,9 @@ export default function BloodInventoryPage() {
           {bloodBank?.name || "Blood Bank"} Inventory
         </h1>
         <div className="flex gap-2">
-          <Link to="/blood-banks" className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 p-2 rounded-lg flex items-center gap-1 text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-300"><ArrowLeft className="w-6 h-6" />Back</Link>
+          <Link to="/dashboard/blood-banks" className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 p-2 rounded-lg flex items-center gap-1 text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-300"><ArrowLeft className="w-6 h-6" />Back</Link>
           <Button variant="primary" size="xs" onClick={() => handleModalOpen(null)}>
-            + Add Inventory
+            <Plus className="w-6 h-6" />Add Inventory
           </Button>
         </div>
       </div>
@@ -102,8 +99,8 @@ export default function BloodInventoryPage() {
                   <td className="p-3 text-gray-700 dark:text-gray-200">{blood?.units_reserved || "—"}</td>
                   <td className="p-3 text-gray-700 dark:text-gray-200">{blood?.last_updated || "—"}</td>
                   <td className="p-3 text-gray-700 dark:text-gray-200 flex gap-2">
-                    <Button variant="primary" size="xs" onClick={() => handleView(blood.id)}>Edit</Button>
-                    <Button variant="danger" size="xs" onClick={() => handleDelete(blood.id)}>Delete</Button>
+                    <Button variant="primary" size="xs" onClick={() => handleView(blood.id)}><PenBox className="h-5 w-5" />Edit</Button>
+                    <Button variant="danger" size="xs" onClick={() => handleDelete(blood.id)}><Trash2 className="h-5 w-5" />Delete</Button>
 
                   </td>
                 </tr>

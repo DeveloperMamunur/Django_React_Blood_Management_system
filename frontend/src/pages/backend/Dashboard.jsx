@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import { Calendar, MapPin, CheckCircle, ExternalLink, Clock, XCircle, UserPlus} from 'lucide-react';
 import { campaignService } from '../../services/campaignService';
 import { donorService } from '../../services/donorService';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function Dashboard() {
+  const { currentUser } = useAuth();
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,25 +34,27 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    const fetchCurrentDonors = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const res = await donorService.currentDonor();
-        const donorData = res.results || res;
+    if (currentUser.role === 'DONOR') {
+      const fetchCurrentDonors = async () => {
+        try {
+          setLoading(true);
+          setError(null);
+          const resDonor = await donorService.currentDonor();
+          const donorData = resDonor.results || resDonor;
 
-        if (donorData) {
-          setCurrentDonor(donorData);
+          if (donorData) {
+            setCurrentDonor(donorData);
+          }
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          setError("Failed to load campaigns. Please try again later.");
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setError("Failed to load campaigns. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCurrentDonors();
-  }, []);
+      };
+      fetchCurrentDonors();
+    }
+  }, [currentUser]);
   const getProgressPercentage = (registered, max) => {
     return Math.min((registered / max) * 100, 100);
   };
@@ -100,7 +104,28 @@ export default function Dashboard() {
     );
   }
 
-  if (!currentDonor) {
+  if (currentUser.role === 'ADMIN') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-md text-center">
+          <UserPlus className="mx-auto text-red-500 dark:text-red-400 mb-4" size={48} />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Create Your Admin Profile
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            You need to create a admin profile before viewing campaigns.
+          </p>
+          <Link
+            to="/dashboard/admin/profile"
+            className="px-4 py-2 bg-red-500 dark:bg-red-600 text-white rounded-lg hover:bg-red-600 dark:hover:bg-red-500 transition-colors"
+          >
+            Create Profile
+          </Link>
+        </div>
+      </div>
+    );
+  }
+  if (!currentDonor && currentUser.role === 'DONOR') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 p-8">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-md text-center">
@@ -113,6 +138,69 @@ export default function Dashboard() {
           </p>
           <Link
             to="/dashboard/donor/profile"
+            className="px-4 py-2 bg-red-500 dark:bg-red-600 text-white rounded-lg hover:bg-red-600 dark:hover:bg-red-500 transition-colors"
+          >
+            Create Profile
+          </Link>
+        </div>
+      </div>
+    );
+  }
+  if (currentUser.role === 'BLOOD_BANK') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-md text-center">
+          <UserPlus className="mx-auto text-red-500 dark:text-red-400 mb-4" size={48} />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Create Your Blood Bank Profile
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            You need to create a blood bank profile before viewing campaigns.
+          </p>
+          <Link
+            to="/dashboard/bloodbank/profile"
+            className="px-4 py-2 bg-red-500 dark:bg-red-600 text-white rounded-lg hover:bg-red-600 dark:hover:bg-red-500 transition-colors"
+          >
+            Create Profile
+          </Link>
+        </div>
+      </div>
+    );
+  }
+  if (currentUser.role === 'HOSPITAL') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-md text-center">
+          <UserPlus className="mx-auto text-red-500 dark:text-red-400 mb-4" size={48} />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Create Your Hospital Profile
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            You need to create a hospital profile before viewing campaigns.
+          </p>
+          <Link
+            to="/dashboard/hospital/profile"
+            className="px-4 py-2 bg-red-500 dark:bg-red-600 text-white rounded-lg hover:bg-red-600 dark:hover:bg-red-500 transition-colors"
+          >
+            Create Profile
+          </Link>
+        </div>
+      </div>
+    );
+  }
+  if (currentUser.role === 'RECEIVER') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-md text-center">
+          <UserPlus className="mx-auto text-red-500 dark:text-red-400 mb-4" size={48} />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Create Your Receiver Profile
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            You need to create a receiver profile before viewing campaigns.
+          </p>
+          <Link
+            to="/dashboard/receiver/profile"
             className="px-4 py-2 bg-red-500 dark:bg-red-600 text-white rounded-lg hover:bg-red-600 dark:hover:bg-red-500 transition-colors"
           >
             Create Profile
