@@ -59,7 +59,7 @@ export default function Sidebar() {
     { id: 5, link: "/dashboard/blood-banks", name: "Blood Banks", icon: Droplet, roles: ["ADMIN"] },
     { id: 6, link: "/dashboard/receivers", name: "Receivers", icon: UserRound, roles: ["ADMIN"] },
     { id: 7, link: "/dashboard/requests", name: "Requests", icon: FileText, roles: ["ADMIN", "RECEIVER", "HOSPITAL", "DONOR"] },
-    { id: 8, link: "/dashboard/campaigns", name: "Campaigns", icon: Megaphone, roles: ["ADMIN", "BLOOD_BANK"] },
+    { id: 8, link: "/dashboard/campaigns", name: "Campaigns", icon: Megaphone, roles: ["ADMIN","DONOR","BLOOD_BANK"] },
     { id: 9, link: "/dashboard/reports", name: "Reports", icon: BarChart3, roles: ["ADMIN"]},
     { id: 10, link: `/dashboard/blood-banks/${bloodBankId}/inventory`, name: "Inventory", icon: Package, roles: ["BLOOD_BANK"] },
   ];
@@ -86,7 +86,7 @@ export default function Sidebar() {
               <>
                 <Heart className="h-8 w-8 text-red-500" />
                 <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">
-                  BloodLink
+                  LifeFlow
                 </span>
               </>
             )}
@@ -162,7 +162,7 @@ export default function Sidebar() {
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300 ease-in-out"
+          className="lg:hidden fixed inset-0 bg-black/50 dark:bg-gray-900/60 z-40 transition-opacity duration-300 ease-in-out"
           onClick={closeSidebar}
         />
       )}
@@ -186,7 +186,9 @@ export default function Sidebar() {
         </div>
 
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          {navItems.map((item) => {
+          {navItems
+          .filter(item => item.roles.includes(role))
+          .map((item) => {
             const Icon = item.icon;
             return (
               <Link

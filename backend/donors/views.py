@@ -37,6 +37,7 @@ class CurrentDonorProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         user = self.request.user
+        
         if user.role != 'DONOR':
             raise PermissionDenied("Only DONOR users can have a donor profile.")
 

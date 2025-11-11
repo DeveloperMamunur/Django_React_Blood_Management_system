@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     BloodBankListCreateView, BloodBankDetailView,
     BloodInventoryListCreateView, BloodInventoryDetailView,
-    CurrentBloodBankView, bloodBankListView
+    CurrentBloodBankView, bloodBankListView, BloodInventoryListView
 )
 
 urlpatterns = [
@@ -12,4 +12,5 @@ urlpatterns = [
     path('bloodbanks/<int:bank_pk>/inventory/<int:pk>/', BloodInventoryDetailView.as_view(), name='inventory-detail'),
     path('bloodbanks/current/', CurrentBloodBankView.as_view(), name='current-bloodbank'),
     path('bloodbanks/all/', bloodBankListView.as_view(), name='all-bloodbank-list'),
+    path('bloodbanks/inventory/', BloodInventoryListView.as_view(), name='inventory-list'),
 ]

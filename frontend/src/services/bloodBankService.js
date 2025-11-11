@@ -128,4 +128,14 @@ export const bloodBankService = {
         }
     },
 
+    async allBloodsInventory () {
+        try {
+            const response = await api.get('/bloodbanks/inventory/');
+            console.log(response.data);
+            
+            return response.data;    
+        } catch (error) {
+            console.log(error);
+        }
+    }
 };

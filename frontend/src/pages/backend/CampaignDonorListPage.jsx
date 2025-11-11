@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { User, Mail, Phone, MapPin, Calendar, DollarSign, Loader2, Droplet, Clock, FileText, ArrowLeftFromLine } from "lucide-react";
 import { campaignService } from "../../services/campaignService";
 import { useParams, Link} from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 export default function CampaignDonorListPage() {
   const { campaignId } = useParams();
   const [registrations, setRegistrations] = useState([]);
   const [campaign, setCampaign] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { currentUser } = useAuth();
 
 
   useEffect(() => {
@@ -111,7 +113,15 @@ export default function CampaignDonorListPage() {
           </p>
         </div>
         <div className="flex justify-end items-center mb-4">
-            <Link  to="/dashboard/campaigns" className="font-semibold rounded transition-all duration-200 focus:outline-none focus:ring-4 disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2 active:scale-95 bg-linear-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white shadow-lg shadow-purple-500/30 dark:shadow-purple-500/20 focus:ring-purple-500/50 px-4 py-2 text-sm "><ArrowLeftFromLine className="w-6 h-6" />Back to Campaigns</Link>
+          {["ADMIN", "BLOOD_BANK"].includes(currentUser.role) && (
+            <Link
+              to={currentUser.role === "ADMIN" ? "/dashboard/campaigns" : "/dashboard"}
+              className="font-semibold rounded transition-all duration-200 focus:outline-none focus:ring-4 disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2 active:scale-95 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white shadow-lg shadow-purple-500/30 dark:shadow-purple-500/20 focus:ring-purple-500/50 px-4 py-2 text-sm"
+            >
+              <ArrowLeftFromLine className="w-5 h-5" />
+              Back to Campaigns
+            </Link>
+          )}
         </div>
 
         {/* Stats Summary */}

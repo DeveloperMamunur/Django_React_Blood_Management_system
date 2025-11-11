@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "../../components/ui";
-import { Eye, Pencil, Trash2, Package} from "lucide-react";
+import { Eye, Trash2, Package} from "lucide-react";
 import { bloodBankService } from "../../services/bloodBankService";
 import BloodBankModal from "../../components/modals/BloodBankModal";
 import { Link } from "react-router-dom";
@@ -84,7 +84,7 @@ export default function BloodBankPage() {
                   </td>
                   <td className="p-3 text-gray-700 dark:text-gray-200 flex gap-2">
                     <Button variant="primary" size="xs" onClick={() => {handleView(bloodBank.id)}}><Eye className="h-5 w-5" /> View</Button>
-                    <Link to={`/dashboard/blood-banks/${bloodBank.id}/inventory`} className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-4 rounded text-nowrap"><Package className="h-5 w-5" />Inventory</Link>
+                    <Link to={`/dashboard/blood-banks/${bloodBank.id}/inventory`} className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-4 rounded flex items-center gap-1"><Package className="h-5 w-5" />Inventory</Link>
                     <Button variant="danger" size="xs" onClick={() => handleDelete(bloodBank.id)}><Trash2 className="h-5 w-5" />Delete</Button>
 
                   </td>

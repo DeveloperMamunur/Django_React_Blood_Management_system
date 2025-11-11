@@ -25,7 +25,7 @@ export default function CreateUserModal({ isOpen, onClose, onUserCreated, user }
         email: user.email || '',
         first_name: user.first_name || '',
         last_name: user.last_name || '',
-        password: '', // Don't populate password for security
+        password: '', 
         role: user.role || 'DONOR',
         phone_number: user.phone_number || '',
       });

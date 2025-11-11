@@ -43,6 +43,20 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"
 
+    @property
+    def location(self):
+        if self.role == "DONOR" and hasattr(self, "donor_profile"):
+            return self.donor_profile.location
+        elif self.role == "RECEIVER" and hasattr(self, "receiver_profile"):
+            return self.receiver_profile.location
+        elif self.role == "HOSPITAL" and hasattr(self, "hospital_profile"):
+            return self.hospital_profile.location
+        elif self.role == "ADMIN" and hasattr(self, "admin_profile"):
+            return self.admin_profile.location
+        elif self.role == "BLOOD_BANK" and hasattr(self, "blood_bank"):
+            return self.blood_bank.location
+        return None
+
 
 class AdminProfile(models.Model):
     user = models.OneToOneField(

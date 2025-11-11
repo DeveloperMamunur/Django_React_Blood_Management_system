@@ -155,14 +155,16 @@ class CreatedBySerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     created_by = CreatedBySerializer(read_only=True)
+    location = LocationSerializer(read_only=True)
+
     class Meta:
         model = User
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name', 
             'role', 'phone_number', 'is_active_account', 'email_verified',
-            'created_at', 'updated_at', 'created_by'
+            'created_at', 'updated_at', 'created_by', 'location'
         ]
-        read_only_fields = ['created_by']
+        read_only_fields = ['created_by', 'location']
 
 # -----------------------------
 # Admin Profile Serializer

@@ -76,13 +76,22 @@ class CampaignListSerializer(serializers.ModelSerializer):
     class Meta:
         model = BloodDriveCampaign
         fields = ['id', 'campaign_name', 'start_date', 'end_date', 'target_donors', 'address_line1', 'city', 'status', 'banner_image','venue_details', 'registrations']
-    
+
     def get_registrations(self, obj):
         user = self.context['request'].user
-        donor = user.donor_profile if user.is_authenticated else None
-        if donor:
-            return obj.get_registrations().filter(donor=donor).exists()
-        return False
+        if not user.is_authenticated:
+            return False
+        if getattr(user, "role", None) != "DONOR":
+            return False
+
+        donor = getattr(user, "donor_profile", None)
+        if donor is None:
+            return False
+            
+        return CampaignRegistration.objects.filter(
+            campaign=obj,
+            donor=donor
+        ).exists()
 
 
 

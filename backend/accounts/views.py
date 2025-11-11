@@ -10,7 +10,8 @@ from .models import HospitalProfile, ReceiverProfile, AdminProfile
 from donors.models import DonorProfile
 from analytics.models import ActivityLog 
 from django.utils import timezone
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, PermissionDenied
+from django.db import transaction
 
 from accounts.serializers import (
     UserSerializer,
@@ -140,7 +141,15 @@ class UserListCreateView(generics.ListCreateAPIView):
         role = self.request.data.get('role')
         if role == 'ADMIN':
             raise PermissionDenied("Cannot create another admin user.")
-        serializer.save(created_by=user)
+        password = self.request.data.get('password')
+        with transaction.atomic():
+            instance = serializer.save(created_by=user)
+            if password:
+                instance.set_password(password)
+            else:
+                instance.set_unusable_password()
+            instance.save()
+
 
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):

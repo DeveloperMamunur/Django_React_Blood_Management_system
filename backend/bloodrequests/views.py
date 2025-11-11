@@ -27,6 +27,9 @@ class BloodRequestListCreateView(generics.ListCreateAPIView):
         location_id = self.request.query_params.get('location_id')
         if location_id:
             queryset = queryset.filter(location_id=location_id)
+        city = self.request.query_params.get('city')
+        if city:
+            queryset = queryset.filter(location__city__icontains=city)
 
         if user.role == 'DONOR':
             queryset = queryset.filter(

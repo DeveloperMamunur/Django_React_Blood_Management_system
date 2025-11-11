@@ -13,6 +13,16 @@ class BloodInventorySerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['blood_bank'] 
 
+    def get_status(self, obj):
+        if obj.units_available < obj.critical_threshold:
+            return "critical"
+        elif obj.units_available < obj.minimum_threshold:
+            return "low"
+        elif obj.units_available < 50:
+            return "normal"
+        else:
+            return "full"
+
     def create(self, validated_data):
         request = self.context.get('request')
         bank_pk = self.context.get('view').kwargs.get('bank_pk')
@@ -44,15 +54,8 @@ class BloodBankSerializer(serializers.ModelSerializer):
         return obj.city_country()
 
     def get_inventory(self, obj):
-        if hasattr(obj, "inventory"):
-            return [
-                {
-                    "blood_group": inv.blood_group,
-                    "units_available": inv.units_available,
-                }
-                for inv in obj.inventory.all()
-            ]
-        return []
+        inventory = obj.inventory.all()
+        return BloodInventorySerializer(inventory, many=True).data
 
     def create(self, validated_data):
         request = self.context.get("request")

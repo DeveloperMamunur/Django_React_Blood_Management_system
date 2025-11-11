@@ -4,6 +4,7 @@ import { Button } from "../../components/ui";
 import { ArrowLeft, PenBox, Plus, Trash2 } from "lucide-react";
 import { bloodBankService } from "../../services/bloodBankService";
 import CreateBloodInventoryModal from "../../components/modals/CreateBloodInventoryModal";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function BloodInventoryPage() {
     const { bloodBankId } = useParams(); 
@@ -12,6 +13,7 @@ export default function BloodInventoryPage() {
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedBloodId, setSelectedBloodId] = useState(null);
+    const { currentUser } = useAuth();
 
 
     const fetchBloods = async () => {
@@ -65,7 +67,9 @@ export default function BloodInventoryPage() {
           {bloodBank?.name || "Blood Bank"} Inventory
         </h1>
         <div className="flex gap-2">
-          <Link to="/dashboard/blood-banks" className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 p-2 rounded-lg flex items-center gap-1 text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-300"><ArrowLeft className="w-6 h-6" />Back</Link>
+          {currentUser?.role === 'ADMIN' &&(
+            <Link to="/dashboard/blood-banks" className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 p-2 rounded-lg flex items-center gap-1 text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-300"><ArrowLeft className="w-6 h-6" />Back</Link>
+          )}
           <Button variant="primary" size="xs" onClick={() => handleModalOpen(null)}>
             <Plus className="w-6 h-6" />Add Inventory
           </Button>

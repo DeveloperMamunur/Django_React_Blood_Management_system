@@ -1,7 +1,9 @@
+from django.db.models import Sum, Q, Min
 from rest_framework import generics, permissions
+from rest_framework.response import Response
 from bloodbanks.models import BloodBank, BloodInventory
 from bloodbanks.serializers import BloodBankSerializer, BloodInventorySerializer
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, PermissionDenied
 from analytics.signals import inventory_updated_signal
 
 
@@ -86,7 +88,6 @@ class BloodInventoryListCreateView(generics.ListCreateAPIView):
             return qs
         return qs.filter(blood_bank__managed_by=user)
 
-
 class BloodInventoryDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = BloodInventory.objects.all()
     serializer_class = BloodInventorySerializer
@@ -108,3 +109,46 @@ class BloodInventoryDetailView(generics.RetrieveUpdateDestroyAPIView):
         if user.is_superuser or user.role == 'ADMIN':
             return qs
         return qs.filter(blood_bank__managed_by=user)
+
+class BloodInventoryListView(generics.ListAPIView):
+    queryset = BloodInventory.objects.all()
+    serializer_class = BloodInventorySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        qs = BloodInventory.objects.all()
+
+        if user.is_superuser or user.role == 'ADMIN':
+            blood_group = self.kwargs.get('blood_group')
+            if blood_group:
+                return qs.filter(blood_group=blood_group)
+            return qs
+        return BloodInventory.objects.none()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        response = super().list(request, *args, **kwargs)
+
+        total_available = queryset.aggregate(total=Sum('units_available'))['total'] or 0
+        total_reserved = queryset.aggregate(total=Sum('units_reserved'))['total'] or 0
+
+        group_totals = []
+        for group in queryset.values('blood_group').distinct():
+            group_records = queryset.filter(blood_group=group['blood_group'])
+            total_available_group = group_records.aggregate(Sum('units_available'))['units_available__sum'] or 0
+            total_reserved_group = group_records.aggregate(Sum('units_reserved'))['units_reserved__sum'] or 0
+
+            group_totals.append({
+                'blood_group': group['blood_group'],
+                'total_available': total_available_group,
+                'total_reserved': total_reserved_group,
+            })
+
+        return Response({
+            "results": response.data,
+            "total_available": total_available,
+            "total_reserved": total_reserved,
+            "total_units": total_available + total_reserved,
+            "group_totals": group_totals,
+        })
