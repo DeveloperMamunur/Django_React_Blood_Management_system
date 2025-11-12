@@ -223,10 +223,10 @@ export default function DonorRequest() {
           <p className="text-gray-600 dark:text-gray-400">Make a difference today - every drop counts</p>
         </div>
           <div className="space-y-6">
-            {requests.length > 0 ? (
-              requests
-                .filter((request) => request.blood_group === currentDonor.blood_group)
-                .map((request) => (
+            {requests
+              .filter((request) => request.blood_group === currentDonor.blood_group)
+              .length > 0 ? (
+              requests.map((request) => (
                 <div
                   key={request.id}
                   className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-600"
@@ -418,7 +418,7 @@ export default function DonorRequest() {
                   <Droplet size={48} className="text-red-500 dark:text-red-400" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-                  No Blood Requests Available
+                  No Blood Requests Available for Approval
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
                   There are currently no pending blood donation requests. Check back later or explore active campaigns.

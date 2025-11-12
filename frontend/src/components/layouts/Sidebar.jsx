@@ -54,7 +54,7 @@ export default function Sidebar() {
   const navItems = [
     { id: 1, link: "/dashboard", name: "Dashboard", icon: LayoutDashboard, roles: ["ADMIN", "RECEIVER", "HOSPITAL", "BLOOD_BANK", "DONOR"] },
     { id: 2, link: "/dashboard/users", name: "Users", icon: Users, roles: ["ADMIN"] },
-    { id: 3, link: "/dashboard/donors", name: "Donors", icon: HeartHandshake, roles: ["ADMIN"] },
+    { id: 3, link: "/dashboard/donors", name: "Donors", icon: HeartHandshake, roles: ["ADMIN","RECEIVER","HOSPITAL"] },
     { id: 4, link: "/dashboard/hospitals", name: "Hospitals", icon: Hospital, roles: ["ADMIN"]},
     { id: 5, link: "/dashboard/blood-banks", name: "Blood Banks", icon: Droplet, roles: ["ADMIN"] },
     { id: 6, link: "/dashboard/receivers", name: "Receivers", icon: UserRound, roles: ["ADMIN"] },

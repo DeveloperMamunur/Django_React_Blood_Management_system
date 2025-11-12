@@ -1,7 +1,10 @@
 from rest_framework import generics, permissions
 from donors.models import DonorProfile, DonationRecord
 from donors.serializers import DonorProfileSerializer, DonationRecordSerializer
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, PermissionDenied
+from django.db.models import Q
+from datetime import timedelta
+from django.utils import timezone
 
 class DonorProfileListCreateView(generics.ListCreateAPIView):
     serializer_class = DonorProfileSerializer
@@ -9,6 +12,14 @@ class DonorProfileListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        today = timezone.now().date()
+        ninety_days_ago = today - timedelta(days=90)
+
+        if user.role in ["RECEIVER", "HOSPITAL"]:
+            return DonorProfile.objects.filter(
+                Q(last_donation_date__lte=ninety_days_ago) | Q(last_donation_date__isnull=True),
+                is_available=True
+            ).order_by('-id')
         if user.is_superuser or user.role == 'ADMIN':
             return DonorProfile.objects.all().order_by('-id')
         return DonorProfile.objects.filter(user=user, user__role='DONOR')

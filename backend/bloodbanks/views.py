@@ -71,6 +71,19 @@ class CurrentBloodBankView(generics.RetrieveAPIView):
 class bloodBankListView(generics.ListAPIView):
     queryset = BloodBank.objects.all()
     serializer_class = BloodBankSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+
+    def get_status(self, obj):
+        if obj.units_available < obj.critical_threshold:
+            return "critical"
+        elif obj.units_available < obj.minimum_threshold:
+            return "low"
+        elif obj.units_available < 50:
+            return "normal"
+        else:
+            return "full"
     
 
 class BloodInventoryListCreateView(generics.ListCreateAPIView):

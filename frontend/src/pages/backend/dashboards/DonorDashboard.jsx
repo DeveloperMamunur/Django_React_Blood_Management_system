@@ -5,6 +5,7 @@ import { campaignService } from '../../../services/campaignService';
 import { useAuth } from '../../../hooks/useAuth';
 import { donorService } from '../../../services/donorService';
 import { requestService } from '../../../services/requestService';
+import { DonorEligibilityCard } from '../../../components/common/DonorEligibilityCard';
 
 export default function DonorDashboard() {
   const { currentUser } = useAuth();
@@ -425,9 +426,10 @@ export default function DonorDashboard() {
               </p>
             </div>
           </div>
+          <DonorEligibilityCard days={currentDonor?.days_until_eligible} />
           <div className="bg-indigo-600 dark:bg-indigo-700 text-white hover:bg-indigo-700 p-4 rounded-lg shadow-lg">
             <div className="flex items-center gap-2">
-              {currentDonor?.is_available ? (
+              {currentDonor?.days_until_eligible === 0 ? (
                 <>
                 <CheckCircle size={24} />
                 <h3 className="text-lg font-semibold text-white dark:text-gray-200">Available</h3>
@@ -602,10 +604,10 @@ export default function DonorDashboard() {
           </div>
         </div>
         <div className="space-y-6">
-          {requests.length > 0 ? (
-            requests
+          {requests
               .filter((request) => request.blood_group === currentDonor.blood_group)
-              .map((request) => (
+              .length > 0 ? (
+              requests.map((request) => (
               <div
                 key={request.id}
                 className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-600"

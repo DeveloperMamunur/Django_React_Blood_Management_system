@@ -261,7 +261,7 @@ export default function ReceiverDashboard() {
         </div>
         <div className='bg-gray-200 dark:bg-gray-800 p-6 my-2'>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Blood Requests
+              Your Blood Requests
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
               Manage and track your blood donation requests
@@ -443,53 +443,55 @@ export default function ReceiverDashboard() {
                     </div>
                   </div>
                 </div>
-                <div className="border-t border-gray-200 dark:border-gray-700/50">
-                  <div className="flex flex-col md:flex-row gap-4 justify-between px-5 py-3">
-                    <div className="flex flex-row items-center gap-2">
-                      <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center shrink-0">
-                        <User size={18} className="text-blue-600 dark:text-blue-400" />
+                {request?.approved_by && (
+                  <div className="border-t border-gray-200 dark:border-gray-700/50">
+                    <div className="flex flex-col md:flex-row gap-4 justify-between px-5 py-3">
+                      <div className="flex flex-row items-center gap-2">
+                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center shrink-0">
+                          <User size={18} className="text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                            Approved_by: {request.approved_by?.first_name ? request?.approved_by?.first_name+' '+request.approved_by.last_name : request?.approved_by?.username}
+                          </p>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                            {request.approved_at ? new Date(request.approved_at).toLocaleString() : 'Not Approved'}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                          Approved_by: {request.approved_by?.first_name ? request.approved_by.first_name+' '+request.approved_by.last_name : request.approved_by.username}
-                        </p>
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                          {request.approved_at ? new Date(request.approved_at).toLocaleString() : 'Not Approved'}
-                        </p>
+                      <div className="flex flex-row items-center gap-2">
+                        <div className="w-10 h-10 bg-pink-100 dark:bg-pink-900/30 rounded-lg flex items-center justify-center shrink-0">
+                          <MapPin size={18} className="text-pink-600 dark:text-pink-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                            {request.approved_by?.location?.address_line1}, {request.approved_by?.location?.police_station}, {request.approved_by?.location?.postal_code}
+                          </p>
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                            {request.approved_by?.location?.city}, {request.approved_by?.location?.country}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex flex-row items-center gap-2">
-                      <div className="w-10 h-10 bg-pink-100 dark:bg-pink-900/30 rounded-lg flex items-center justify-center shrink-0">
-                        <MapPin size={18} className="text-pink-600 dark:text-pink-400" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                          {request.approved_by?.location?.address_line1}, {request.approved_by?.location?.police_station}, {request.approved_by?.location?.postal_code}
-                        </p>
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                          {request.approved_by?.location?.city}, {request.approved_by?.location?.country}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex flex-row items-center gap-2">
-                      <div className="w-10 h-10 bg-pink-100 dark:bg-pink-900/30 rounded-lg flex items-center justify-center shrink-0">
-                        <RouteIcon size={18} className="text-blue-500 dark:text-blue-400 mx-auto" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                          Distance
-                        </p>
-                        {getDistanceToDonor(request) && (
-                          <div className="flex  gap-1 mt-1">
-                            <span className="text-md text-blue-600 dark:text-blue-400 font-semibold">
-                              {getDistanceToDonor(request)} km
-                            </span>
-                          </div>
-                        )}
+                      <div className="flex flex-row items-center gap-2">
+                        <div className="w-10 h-10 bg-pink-100 dark:bg-pink-900/30 rounded-lg flex items-center justify-center shrink-0">
+                          <RouteIcon size={18} className="text-blue-500 dark:text-blue-400 mx-auto" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                            Distance
+                          </p>
+                          {getDistanceToDonor(request) && (
+                            <div className="flex  gap-1 mt-1">
+                              <span className="text-md text-blue-600 dark:text-blue-400 font-semibold">
+                                {getDistanceToDonor(request)} km
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             ))}
             <div className="flex justify-center mt-8">

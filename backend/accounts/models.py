@@ -7,6 +7,7 @@ from locations.models import Location
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils import timezone
 import uuid
+from django.apps import apps
 
 class User(AbstractUser):
     ROLE_CHOICES = (
@@ -53,8 +54,13 @@ class User(AbstractUser):
             return self.hospital_profile.location
         elif self.role == "ADMIN" and hasattr(self, "admin_profile"):
             return self.admin_profile.location
-        elif self.role == "BLOOD_BANK" and hasattr(self, "blood_bank"):
-            return self.blood_bank.location
+        elif self.role == "BLOOD_BANK":
+            BloodBank = apps.get_model('bloodbanks', 'BloodBank')
+            try:
+                blood_bank = BloodBank.objects.get(managed_by=self)
+                return blood_bank.location
+            except BloodBank.DoesNotExist:
+                return None
         return None
 
 

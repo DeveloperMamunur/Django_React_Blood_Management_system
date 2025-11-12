@@ -8,6 +8,7 @@ from locations.serializers import LocationSerializer
 import os
 
 class BloodInventorySerializer(serializers.ModelSerializer):
+    status = serializers.SerializerMethodField()
     class Meta:
         model = BloodInventory
         fields = '__all__'

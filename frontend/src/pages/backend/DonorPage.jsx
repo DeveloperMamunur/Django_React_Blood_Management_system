@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { donorService } from "../../services/donorService";
 import { Button } from "../../components/ui";
-import { Eye } from "lucide-react";
+import { Contact, Eye } from "lucide-react";
 import DonorModal from "../../components/modals/DonorModal";
+import { useAuth } from "../../hooks/useAuth";
+import { EligibilityBadge } from "../../components/common/EligibilityBadge";
 
 export default function DonorPage() {
+  const { currentUser } = useAuth();
   const [donors, setDonors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -66,6 +69,7 @@ export default function DonorPage() {
                 <th className="p-3 text-left font-semibold border-b border-gray-300 dark:border-gray-700">Phone</th>
                 <th className="p-3 text-left font-semibold border-b border-gray-300 dark:border-gray-700">Address</th>
                 <th className="p-3 text-left font-semibold border-b border-gray-300 dark:border-gray-700">Blood Group</th>
+                <th className="p-3 text-left font-semibold border-b border-gray-300 dark:border-gray-700">Status</th>
                 <th className="p-3 text-left font-semibold border-b border-gray-300 dark:border-gray-700">Action</th>
               </tr>
             </thead>
@@ -81,10 +85,26 @@ export default function DonorPage() {
                       : "N/A"}
                   </td>
                   <td className="p-3 text-gray-700 dark:text-gray-200">{donor?.blood_group || "—"}</td>
+                  <td className="p-3 text-gray-700 dark:text-gray-200">
+                    <EligibilityBadge days={donor?.days_until_eligible} />
+                  </td>
                   <td className="p-3 text-gray-700 dark:text-gray-200 flex gap-2">
-                    <Button variant="primary" size="xs" onClick={() => {handleView(donor.id)}}><Eye className="h-5 w-5" /> View</Button>
-                    <Button variant="danger" size="xs" onClick={() => handleDelete(donor.id)}>Delete</Button>
+                    {currentUser?.role === "ADMIN" && (
+                      <>
+                        <Button variant="primary" size="xs" onClick={() => handleView(donor.id)}>
+                          <Eye className="h-5 w-5" /> View
+                        </Button>
+                        <Button variant="danger" size="xs" onClick={() => handleDelete(donor.id)}>
+                          Delete
+                        </Button>
+                      </>
+                    )}
 
+                    {(currentUser?.role === "RECEIVER" || currentUser?.role === "HOSPITAL") && (
+                      <Button variant="primary" size="xs">
+                        <Contact className="h-5 w-5" /> Contact Now
+                      </Button>
+                    )}
                   </td>
                 </tr>
               ))}
