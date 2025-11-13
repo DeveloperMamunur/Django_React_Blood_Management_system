@@ -73,4 +73,14 @@ export const donorService = {
       return null;
     }
   },
+  async verifyDonor(id, data) {
+    try {
+      const response = await api.patch(`/donors/profiles/${id}/`, data);
+      console.log("Donor verified:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error verifying donor:", error);
+      throw error;
+    }
+  },
 };

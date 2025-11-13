@@ -85,16 +85,34 @@ class UserLogoutView(APIView):
 
     def post(self, request):
         refresh_token = request.data.get("refresh")
+        user = request.user
+
         if not refresh_token:
             return Response({"detail": "Refresh token is required."}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             token = RefreshToken(refresh_token)
             token.blacklist()
+
+            ActivityLog.objects.create(
+                user=user,
+                action="USER_LOGOUT",
+                description=f"User '{user.username}' logged out successfully.",
+                ip_address=self.get_client_ip(request),
+                user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                metadata={
+                    "timestamp": timezone.now().isoformat(),
+                }
+            )
+
         except TokenError:
-            # Token already blacklisted or invalid
-            pass
+            return Response({"detail": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+
         return Response({"detail": "Logged out successfully."}, status=status.HTTP_205_RESET_CONTENT)
 
+    def get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        return x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
 
 # -----------------------------
 # Password Change
@@ -136,21 +154,45 @@ class UserListCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         user = self.request.user
-        if not (user.is_superuser or user.role == 'ADMIN'):
-            raise PermissionDenied("Only admins can create new users.")
-        role = self.request.data.get('role')
-        if role == 'ADMIN':
-            raise PermissionDenied("Cannot create another admin user.")
-        password = self.request.data.get('password')
-        with transaction.atomic():
-            instance = serializer.save(created_by=user)
-            if password:
-                instance.set_password(password)
-            else:
-                instance.set_unusable_password()
-            instance.save()
+        try:
+            if not (user.is_superuser or user.role == 'ADMIN'):
+                raise PermissionDenied("Only admins can create new users.")
+            role = self.request.data.get('role')
+            if role == 'ADMIN':
+                raise PermissionDenied("Cannot create another admin user.")
+            password = self.request.data.get('password')
+            with transaction.atomic():
+                instance = serializer.save(created_by=user)
+                if password:
+                    instance.set_password(password)
+                else:
+                    instance.set_unusable_password()
+                instance.save()
 
+            ActivityLog.objects.create(
+                user=user,
+                action="USER_CREATE",
+                description=f"User '{instance.username}' created successfully.",
+                ip_address=self.get_client_ip(self.request),
+                user_agent=self.request.META.get('HTTP_USER_AGENT', ''),
+                metadata={
+                    "timestamp": timezone.now().isoformat(),
+                }
+            )
+        except PermissionDenied as e:
+            ActivityLog.objects.create(
+                user=user,
+                action="USER_CREATE_FAILED",
+                description=str(e),
+                ip_address=self.get_client_ip(self.request),
+                user_agent=self.request.META.get('HTTP_USER_AGENT', ''),
+                metadata={"timestamp": timezone.now().isoformat()},
+            )
+            raise
 
+    def get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        return x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
 
 class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
@@ -332,6 +374,32 @@ class HospitalProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
             return user.hospital_profile
         except HospitalProfile.DoesNotExist:
             raise NotFound("Hospital profile not found for this user.")
+
+    def perform_update(self, serializer):
+        user = self.request.user
+        is_verified = str(self.request.data.get('is_verified')).lower() in ['true', '1', 'yes']
+        verified_user = self.request.data.get('')
+        if not (user.is_superuser or user.role == 'ADMIN') and is_verified:
+            raise PermissionDenied("Only admins can update hospital profiles.")
+        serializer.save(
+            is_verified=is_verified,
+            verified_at=timezone.now() if is_verified else None,
+            verified_by=user if is_verified else None
+        )
+        hospital = serializer.instance
+        hospital_user = hospital.user
+        ActivityLog.objects.create(
+            user=user,
+            action='HOSPITAL_VERIFIED' if is_verified else 'HOSPITAL_UNVERIFIED',
+            description=f"Admin '{user.username}' has {'verified' if is_verified else 'unverified'} hospital '{hospital_user.username}'.",
+            ip_address=self.get_client_ip(self.request),
+            user_agent=self.request.META.get('HTTP_USER_AGENT', ''),
+            metadata={"timestamp": timezone.now().isoformat()},
+        )
+
+    def get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        return x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
 
 class CurrentHospitalProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = HospitalProfileSerializer

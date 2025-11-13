@@ -77,8 +77,6 @@ export default function DonorRequest() {
       try {
         await requestService.updateRequest(requestId, {
           status: 'PENDING',
-          approved_at: null,
-          approved_by: null
         });
         alert('Approval cancelled successfully.');
         fetchRequests();
@@ -226,7 +224,9 @@ export default function DonorRequest() {
             {requests
               .filter((request) => request.blood_group === currentDonor.blood_group)
               .length > 0 ? (
-              requests.map((request) => (
+              requests
+              .filter((request) => request.blood_group === currentDonor.blood_group)
+              .map((request) => (
                 <div
                   key={request.id}
                   className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-600"

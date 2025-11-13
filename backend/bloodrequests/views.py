@@ -2,6 +2,7 @@ from analytics.signals import request_created_signal
 from rest_framework import generics, permissions
 from django.db import models
 from .models import BloodRequest
+from analytics.models import ActivityLog
 from .serializers import BloodRequestSerializer
 from locations.models import Location
 from django.utils import timezone
@@ -54,32 +55,86 @@ class BloodRequestDetailView(generics.RetrieveUpdateDestroyAPIView):
         status = self.request.data.get('status')
         user = self.request.user
         instance = serializer.instance
-
+        old_status = instance.status
         update_data = {}
+        action = None
+        description = ""
 
         if status == 'APPROVED':
-            update_data['approved_by'] = user
-            update_data['approved_at'] = timezone.now()
+            update_data.update({
+                'approved_by': user,
+                'approved_at': timezone.now(),
+                'status': 'APPROVED',
+            })
+            action = 'REQUEST_APPROVED'
+            description = f"Request #{instance.id} approved by {user.username}"
 
         elif status == 'CANCELLED':
-            update_data['approved_by'] = user
-            update_data['status'] = 'CANCELLED'
-            update_data['rejection_reason'] = "Request Cancelled"
+            update_data.update({
+                'cancelled_by': user,
+                'status': 'CANCELLED',
+                'rejection_reason': "Request Cancelled by Donor",
+            })
+            action = 'REQUEST_CANCELLED'
+            description = f"Request #{instance.id} cancelled by {user.username}"
 
         elif status == 'REJECTED':
-            update_data['rejected_by'] = user
-            update_data['rejection_reason'] = self.request.data.get(
-                'rejection_reason', "Request Rejected"
-            )
+            update_data.update({
+                'rejected_by': user,
+                'status': 'REJECTED',
+                'rejection_reason': self.request.data.get('rejection_reason', "Request Rejected"),
+            })
+            action = 'REQUEST_REJECTED'
+            description = f"Request #{instance.id} rejected by {user.username}"
 
-        elif status == 'COMPLETED':
-            update_data['completed_by'] = user
-            update_data['completed_at'] = timezone.now()
+        elif status == 'FULFILLED':
+            update_data.update({
+                'fulfilled_by': user,
+                'status': 'FULFILLED',
+                'approved_at': timezone.now(),
+            })
+            action = 'DONATION_COMPLETED'
+            description = f"Request #{instance.id} marked as completed by {user.username}"
+
+        elif status == 'PENDING':
+            update_data.update({
+                'approved_by': None,
+                'approved_at': None,
+                'cancelled_by': None,
+                'rejected_by': None,
+                'fulfilled_by': None,
+                'status': 'PENDING',
+            })
+            action = 'REQUEST_RESET'
+            description = f"Request #{instance.id} reset to PENDING by {user.username}"
 
         else:
             update_data['status'] = status
+            action = 'REQUEST_UPDATED'
+            description = f"Request #{instance.id} status changed to {status}"
 
-        serializer.save(**update_data)
+        instance = serializer.save(**update_data)
+
+        if action:
+            ActivityLog.objects.create(
+                user=user,
+                action=action,
+                description=description,
+                ip_address=self.get_client_ip(self.request),
+                user_agent=self.request.META.get('HTTP_USER_AGENT', ''),
+                metadata={
+                    "request_id": instance.id,
+                    "old_status": old_status,
+                    "new_status": status,
+                    "timestamp": timezone.now().isoformat(),
+                },
+            )
+
+    def get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            return x_forwarded_for.split(',')[0]
+        return request.META.get('REMOTE_ADDR')
 
     def get_queryset(self):
         user = self.request.user

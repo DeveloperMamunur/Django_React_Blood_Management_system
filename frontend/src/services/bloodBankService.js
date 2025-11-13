@@ -41,6 +41,16 @@ export const bloodBankService = {
             console.log(error);
         }
     },
+    async verifyBloodBank (id, data) {
+        try {
+            const response = await api.patch(`/bloodbanks/${id}/`, data);
+            console.log(response.data);
+            
+            return response.data;    
+        } catch (error) {
+            console.log(error);
+        }
+    },
     async deleteBloodBank (id) {
         try {
             const response = await api.delete(`/bloodbanks/${id}/`);

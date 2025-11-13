@@ -29,6 +29,7 @@ import BloodBankProfilePage from "./pages/backend/profiles/BloodBankProfilePage.
 import CampaignRegister from "./pages/auth/CampaignRegister.jsx";
 import CampaignDonorListPage from "./pages/backend/CampaignDonorListPage.jsx";
 import AdminProfilePage from "./pages/backend/profiles/AdminProfilePage.jsx";
+import ActivityLogs from "./pages/backend/analytics/ActivityLogs.jsx";
 
 function App() {
   return (
@@ -71,6 +72,8 @@ function App() {
                   <Route path="/dashboard/bloodbank/profile" element={<BloodBankProfilePage />} />
                   <Route path="/dashboard/campaign/:campaignId/donors" element={<CampaignDonorListPage />} />
                   <Route path="/dashboard/campaign/:campaignId/register" element={<CampaignRegister />} />
+
+                  <Route path="/dashboard/activity-logs" element={<ActivityLogs />} />
                   
                 </Route>
               </Route>

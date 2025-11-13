@@ -12,12 +12,16 @@ export const analyticService = {
         }
     },
 
-    async getActivityLogs() {
+    async getActivityLogs(page = 1, search = "", action = "ALL") {
         try {
-            const response = await api.get("/analytics/activity-logs/");
-            console.log(response.data);
+            const params = new URLSearchParams();
+            params.append("page", page);
+            if (search) params.append("search", search);
+            if (action !== "ALL") params.append("action", action);
             
-            return response.data;    
+            const response = await api.get(`/analytics/activity-logs/?${params.toString()}`);
+            console.log(response.data);  
+            return response.data;
         } catch (error) {
             console.log(error);
         }

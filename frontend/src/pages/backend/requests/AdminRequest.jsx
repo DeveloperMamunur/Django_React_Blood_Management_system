@@ -14,14 +14,12 @@ export default function AdminRequest() {
   const [selectedRequestId, setSelectedRequestId] = useState(null);
   const { currentUser } = useAuth();
 
-  const role = currentUser?.role || '';
-
   const requestStatus = [
-    { value: "PENDING", label: "Pending", color: "bg-yellow-500 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300", roles: ["ADMIN"] },
-    { value: "APPROVED", label: "Approved", color: "bg-green-500 text-green-800 dark:bg-green-900 dark:text-green-300", roles: ["DONOR", "ADMIN"] },
-    { value: "REJECTED", label: "Rejected", color: "bg-red-500 text-red-800 dark:bg-red-900 dark:text-red-300", roles: [ "ADMIN"] },
-    { value: "FULFILLED", label: "Fulfilled", color: "bg-blue-500 text-blue-800 dark:bg-blue-900 dark:text-blue-300", roles: ["ADMIN","RECEIVER","HOSPITAL"] },
-    { value: "CANCELLED", label: "Cancelled", color: "bg-gray-500 text-gray-800 dark:bg-gray-900 dark:text-gray-300", roles: ["ADMIN","RECEIVER","HOSPITAL","DONOR"] },
+    { value: "PENDING", label: "Pending", color: "bg-yellow-500 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300" },
+    { value: "APPROVED", label: "Approved", color: "bg-green-500 text-green-800 dark:bg-green-900 dark:text-green-300" },
+    { value: "REJECTED", label: "Rejected", color: "bg-red-500 text-red-800 dark:bg-red-900 dark:text-red-300"},
+    { value: "FULFILLED", label: "Fulfilled", color: "bg-blue-500 text-blue-800 dark:bg-blue-900 dark:text-blue-300" },
+    { value: "CANCELLED", label: "Cancelled", color: "bg-gray-500 text-gray-800 dark:bg-gray-900 dark:text-gray-300" },
   ];
 
   const fetchRequests = async () => {
@@ -50,8 +48,7 @@ export default function AdminRequest() {
   const handleStatusChange = async (id, status) => {
     if (window.confirm(`Are you sure you want to change the status to "${status}"?`)) {
       await requestService.updateRequest(id, {
-        status,
-        approved_at: status === "APPROVED" ? new Date().toISOString() : null,
+        status
       });
       fetchRequests();
     }
@@ -128,7 +125,20 @@ export default function AdminRequest() {
                       ? `${request.location?.address_line1 || ""}, ${request.location?.police_station || ""}, ${request.location?.city || ""}, ${request.location?.state || ""}`
                       : "N/A"}
                   </td>
-                  <td className="p-3 text-gray-700 dark:text-gray-200">{getStatusBadge(request.status)}</td>
+                  <td className="p-3 text-gray-700 dark:text-gray-200">
+                    {getStatusBadge(request.status)} by 
+                    <span className="text-gray-700 dark:text-gray-200 text-xs ms-1">
+                      {request.status === "APPROVED"
+                        ? request?.approved_by?.username || "—"
+                        : request.status === "REJECTED"
+                        ? request?.rejected_by?.username || "—"
+                        : request.status === "FULFILLED"
+                        ? request?.fulfilled_by?.username || "—"
+                        : request.status === "CANCELLED"
+                        ? request?.cancelled_by?.username || "—"
+                        : "—"}
+                    </span>
+                  </td>
                   <td className="p-3 text-gray-700 dark:text-gray-200 flex gap-2 items-center">
                       <select
                         value={request.status}
@@ -137,7 +147,6 @@ export default function AdminRequest() {
                       >
                         <option value="">Select Status</option>
                         {requestStatus
-                          .filter(status => status.roles.includes(role))
                           .map((status) => (
                             (<option key={status.value} value={status.value}>{status.label}</option>)
                           ))}

@@ -22,10 +22,10 @@ export default function Home() {
         <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? ('dark:bg-gray-900/95 dark:backdrop-blur-lg dark:shadow-lg bg-white/95 backdrop-blur-lg shadow-lg') : 'bg-transparent'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
+            <Link to="/" className="flex items-center space-x-2">
               <Heart className="w-8 h-8 text-red-500 fill-red-500" />
               <span className="text-xl font-bold">LifeFlow</span>
-            </div>
+            </Link>
             
             <div className="hidden md:flex items-center space-x-8">
               <Link to="/" className="hover:text-red-500 transition-colors">Home</Link>

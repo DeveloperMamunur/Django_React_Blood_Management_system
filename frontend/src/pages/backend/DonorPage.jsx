@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { donorService } from "../../services/donorService";
-import { Button } from "../../components/ui";
-import { Contact, Eye } from "lucide-react";
+import { Button, Badge} from "../../components/ui";
+import { CheckCircle, Contact, Eye, XCircle } from "lucide-react";
 import DonorModal from "../../components/modals/DonorModal";
 import { useAuth } from "../../hooks/useAuth";
 import { EligibilityBadge } from "../../components/common/EligibilityBadge";
@@ -32,6 +32,24 @@ export default function DonorPage() {
     if (window.confirm("Are you sure you want to delete this donor?")) {
       console.log("Deleting donor ID:", id);
       // Add delete API call here later
+    }
+  };
+
+  const handleToggleVerify = async (id) => {
+    try {
+      const donor = donors.find(d => d.id === id);
+      if (!donor) return;
+      const newStatus = !donor.is_verified;
+      await donorService.verifyDonor(id, { is_verified: newStatus });
+
+      setDonors(prevDonors =>
+        prevDonors.map(d =>
+          d.id === id ? { ...d, is_verified: newStatus } : d
+        )
+      );
+
+    } catch (error) {
+      console.error("Error verifying donor:", error);
     }
   };
 
@@ -69,6 +87,7 @@ export default function DonorPage() {
                 <th className="p-3 text-left font-semibold border-b border-gray-300 dark:border-gray-700">Phone</th>
                 <th className="p-3 text-left font-semibold border-b border-gray-300 dark:border-gray-700">Address</th>
                 <th className="p-3 text-left font-semibold border-b border-gray-300 dark:border-gray-700">Blood Group</th>
+                <th className="p-3 text-left font-semibold border-b border-gray-300 dark:border-gray-700">Eligibility</th>
                 <th className="p-3 text-left font-semibold border-b border-gray-300 dark:border-gray-700">Status</th>
                 <th className="p-3 text-left font-semibold border-b border-gray-300 dark:border-gray-700">Action</th>
               </tr>
@@ -88,11 +107,29 @@ export default function DonorPage() {
                   <td className="p-3 text-gray-700 dark:text-gray-200">
                     <EligibilityBadge days={donor?.days_until_eligible} />
                   </td>
+                  <td className="p-3 text-gray-700 dark:text-gray-200">
+                    {donor?.is_verified === true ? (
+                      <Badge status="success" label="Verified" icon={<CheckCircle size={14} />} />
+                    ) : (
+                      <Badge status="danger" label="Not Verified" icon={<XCircle size={14} />} />
+                    )}
+                  </td>
                   <td className="p-3 text-gray-700 dark:text-gray-200 flex gap-2">
                     {currentUser?.role === "ADMIN" && (
                       <>
                         <Button variant="primary" size="xs" onClick={() => handleView(donor.id)}>
                           <Eye className="h-5 w-5" /> View
+                        </Button>
+                        <Button variant={donor?.is_verified ? "danger" : "success"} size="xs" onClick={() => handleToggleVerify(donor.id)}>
+                          {donor?.is_verified ? (
+                            <>
+                              <XCircle className="h-5 w-5" /> Unverified
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle className="h-5 w-5" /> Verified
+                            </>
+                          )}
                         </Button>
                         <Button variant="danger" size="xs" onClick={() => handleDelete(donor.id)}>
                           Delete

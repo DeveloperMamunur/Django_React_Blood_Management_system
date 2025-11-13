@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Button } from "../../components/ui";
-import { Eye } from "lucide-react";
+import { Badge, Button } from "../../components/ui";
+import { CheckCircle, Eye, XCircle } from "lucide-react";
 import { hospitalService } from "../../services/hospitalService";
 import HospitalModal from "../../components/modals/HospitalModal";
 
@@ -29,6 +29,24 @@ export default function HospitalPage() {
     if (window.confirm("Are you sure you want to delete this donor?")) {
       console.log("Deleting Hospital ID:", id);
       // Add delete API call here later
+    }
+  };
+
+  const handleToggleVerify = async (id) => {
+    try {
+      const hospital = hospitals.find(h => h.id === id);
+      if (!hospital) return;
+      const newStatus = !hospital.is_verified;
+      await hospitalService.verifyHospital(id, { is_verified: newStatus });
+
+      setHospitals(prevHospitals =>
+        prevHospitals.map(h =>
+          h.id === id ? { ...h, is_verified: newStatus } : h
+        )
+      );
+
+    } catch (error) {
+      console.error("Error verifying hospital:", error);
     }
   };
 
@@ -79,8 +97,26 @@ export default function HospitalPage() {
                       ? `${hospital.location?.address_line1 || ""}, ${hospital.location?.police_station || ""}, ${hospital.location?.city || ""}, ${hospital.location?.state || ""}`
                       : "N/A"}
                   </td>
+                  <td className="p-3 text-gray-700 dark:text-gray-200">
+                    {hospital?.is_verified === true ? (
+                      <Badge status="success" label="Verified" icon={<CheckCircle size={14} />} />
+                    ) : (
+                      <Badge status="danger" label="Not Verified" icon={<XCircle size={14} />} />
+                    )}
+                  </td>
                   <td className="p-3 text-gray-700 dark:text-gray-200 flex gap-2">
                     <Button variant="primary" size="xs" onClick={() => {handleView(hospital.id)}}><Eye className="h-5 w-5" /> View</Button>
+                    <Button variant={hospital?.is_verified ? "danger" : "success"} size="xs" onClick={() => handleToggleVerify(hospital.id)}>
+                      {hospital?.is_verified ? (
+                        <>
+                          <XCircle className="h-5 w-5" /> Unverified
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle className="h-5 w-5" /> Verified
+                        </>
+                      )}
+                    </Button>
                     <Button variant="danger" size="xs" onClick={() => handleDelete(hospital.id)}>Delete</Button>
 
                   </td>

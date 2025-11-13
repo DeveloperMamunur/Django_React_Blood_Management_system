@@ -48,7 +48,12 @@ class BloodRequest(models.Model):
     hospital_name = models.CharField(max_length=255, blank=True, help_text="Provide hospital name if it is not registered")
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+
     approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_requests')
+    rejected_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='rejected_requests')
+    cancelled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='cancelled_requests')
+    fulfilled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='fulfilled_requests')
+
     approved_at = models.DateTimeField(null=True, blank=True)
     rejection_reason = models.TextField(blank=True)
     assigned_blood_bank = models.ForeignKey(BloodBank, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_requests')
@@ -104,3 +109,7 @@ class BloodRequest(models.Model):
     def clean(self):
         if not self.hospital and not self.hospital_name:
             raise ValidationError("Provide either a registered hospital or a hospital name.")
+        if self.status == 'APPROVED' and not self.approved_by:
+            raise ValidationError("Approved requests must have an approver.")
+        if self.status == 'FULFILLED' and not self.fulfilled_by:
+            raise ValidationError("Fulfilled requests must have a responsible user.")

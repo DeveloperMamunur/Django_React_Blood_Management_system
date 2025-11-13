@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Button } from "../../components/ui";
-import { Eye, Trash2, Package} from "lucide-react";
+import { Badge, Button } from "../../components/ui";
+import { Eye, Trash2, Package, CheckCircle, XCircle} from "lucide-react";
 import { bloodBankService } from "../../services/bloodBankService";
 import BloodBankModal from "../../components/modals/BloodBankModal";
 import { Link } from "react-router-dom";
@@ -34,6 +34,24 @@ export default function BloodBankPage() {
     }
   };
 
+  const handleToggleVerify = async (id) => {
+    try {
+      const bloodBank = bloodBanks.find(b => b.id === id);
+      if (!bloodBank) return;
+      const newStatus = !bloodBank.is_verified;
+      await bloodBankService.verifyBloodBank(id, { is_verified: newStatus });
+
+      setBloodBanks(prevBloodBanks =>
+        prevBloodBanks.map(b =>
+          b.id === id ? { ...b, is_verified: newStatus } : b
+        )
+      );
+
+    } catch (error) {
+      console.error("Error verifying Blood Bank:", error);
+    }
+  };
+
   const handleView = (id) => {
     setSelectedBloodBankId(id);
     setModalOpen(true);
@@ -54,11 +72,11 @@ export default function BloodBankPage() {
       <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow">
         {loading ? (
           <p className="text-center py-6 text-gray-600 dark:text-gray-300">
-            Loading donors...
+            Loading blood Banks...
           </p>
         ) : bloodBanks?.length === 0 ? (
           <p className="text-center py-6 text-gray-500 dark:text-gray-400">
-            No donors found.
+            No blood Banks found.
           </p>
         ) : (
           <table className="w-full border-collapse text-sm">
@@ -82,8 +100,26 @@ export default function BloodBankPage() {
                       ? `${bloodBank.location?.address_line1 || ""}, ${bloodBank.location?.police_station || ""},${bloodBank.location?.city || ""}, ${bloodBank.location?.state || ""}`
                       : "N/A"}
                   </td>
+                  <td className="p-3 text-gray-700 dark:text-gray-200">
+                    {bloodBank?.is_verified === true ? (
+                      <Badge status="success" label="Verified" icon={<CheckCircle size={14} />} />
+                    ) : (
+                      <Badge status="danger" label="Not Verified" icon={<XCircle size={14} />} />
+                    )}
+                  </td>
                   <td className="p-3 text-gray-700 dark:text-gray-200 flex gap-2">
                     <Button variant="primary" size="xs" onClick={() => {handleView(bloodBank.id)}}><Eye className="h-5 w-5" /> View</Button>
+                    <Button variant={bloodBank?.is_verified ? "danger" : "success"} size="xs" onClick={() => handleToggleVerify(bloodBank.id)}>
+                      {bloodBank?.is_verified ? (
+                        <>
+                          <XCircle className="h-5 w-5" /> Unverified
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle className="h-5 w-5" /> Verified
+                        </>
+                      )}
+                    </Button>
                     <Link to={`/dashboard/blood-banks/${bloodBank.id}/inventory`} className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-4 rounded flex items-center gap-1"><Package className="h-5 w-5" />Inventory</Link>
                     <Button variant="danger" size="xs" onClick={() => handleDelete(bloodBank.id)}><Trash2 className="h-5 w-5" />Delete</Button>
 

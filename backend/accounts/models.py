@@ -154,6 +154,8 @@ class HospitalProfile(models.Model):
     has_blood_bank = models.BooleanField(default=False)
     bed_capacity = models.PositiveIntegerField(null=True, blank=True)
     is_verified = models.BooleanField(default=False)
+    verified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='verified_hospitals')
+    verified_at = models.DateTimeField(null=True, blank=True)
     license_document = models.FileField(upload_to='hospital_licenses/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

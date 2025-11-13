@@ -5,6 +5,9 @@ from bloodbanks.models import BloodBank, BloodInventory
 from bloodbanks.serializers import BloodBankSerializer, BloodInventorySerializer
 from rest_framework.exceptions import NotFound, PermissionDenied
 from analytics.signals import inventory_updated_signal
+from django.utils import timezone
+from analytics.models import ActivityLog
+
 
 
 class BloodBankListCreateView(generics.ListCreateAPIView):
@@ -43,6 +46,34 @@ class BloodBankDetailView(generics.RetrieveUpdateDestroyAPIView):
             return user.managed_blood_banks
         except BloodBank.DoesNotExist:
             raise NotFound("No blood bank found for this user.")
+
+    def perform_update(self, serializer):
+        user = self.request.user
+        is_verified = str(self.request.data.get('is_verified')).lower() in ['true', '1', 'yes']
+
+        if not (user.is_superuser or user.role == 'ADMIN') and is_verified:
+            raise PermissionDenied("Only admins can verify blood banks.")
+
+        serializer.save(
+            is_verified=is_verified, 
+            verified_at=timezone.now() if is_verified else None, 
+            verified_by=user if is_verified else None
+        )
+        blood_bank = serializer.instance
+        blood_bank_user = blood_bank.managed_by
+
+        ActivityLog.objects.create(
+            user=user,
+            action='BLOOD_BANK_VERIFIED' if is_verified else 'BLOOD_BANK_UNVERIFIED',
+            description=f"Admin '{user.username}' has {'verified' if is_verified else 'unverified'} blood bank '{blood_bank_user.username}'.",
+            ip_address=self.get_client_ip(self.request),
+            user_agent=self.request.META.get('HTTP_USER_AGENT', ''),
+            metadata={"timestamp": timezone.now().isoformat()},
+        )
+
+    def get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        return x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
 
 class CurrentBloodBankView(generics.RetrieveAPIView):
     serializer_class = BloodBankSerializer

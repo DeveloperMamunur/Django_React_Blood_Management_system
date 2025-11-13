@@ -14,6 +14,10 @@ class BloodBank(models.Model):
     storage_capacity = models.PositiveIntegerField(help_text="Maximum units that can be stored")
     managed_by = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name='managed_blood_banks')
     is_active = models.BooleanField(default=True)
+    is_verified = models.BooleanField(default=False)
+    verified_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='verified_blood_banks')
+    verified_at = models.DateTimeField(null=True, blank=True)
+    license_document = models.FileField(upload_to='blood_bank_licenses/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

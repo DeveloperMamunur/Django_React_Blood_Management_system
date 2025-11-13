@@ -90,9 +90,7 @@ export default function DonorDashboard() {
     if (window.confirm('Are you sure you want to approve this blood donation request?')) {
       try {
         await requestService.updateRequest(requestId, {
-          status: 'APPROVED',
-          approved_at: new Date().toISOString(),
-          approved_by: currentDonor.id
+          status: 'APPROVED'
         });
         alert('Request approved successfully! The hospital will contact you soon.');
       } catch (error) {
@@ -106,9 +104,7 @@ export default function DonorDashboard() {
     if (window.confirm('Are you sure you want to cancel your approval for this request?')) {
       try {
         await requestService.updateRequest(requestId, {
-          status: 'PENDING',
-          approved_at: null,
-          approved_by: currentDonor.id
+          status: 'PENDING'
         });
         alert('Approval cancelled successfully.');
       } catch (error) {
@@ -459,7 +455,7 @@ export default function DonorDashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {campaigns.map((campaign) => {
+          {campaigns?.map((campaign) => {
             const registered = campaign?.registered_donors?.includes(currentDonor.id) || false;
             const progressPercentage = getProgressPercentage(campaign.registration_count, campaign.target_donors);
             const statusConfig = getStatusConfig(campaign.status);
@@ -607,7 +603,9 @@ export default function DonorDashboard() {
           {requests
               .filter((request) => request.blood_group === currentDonor.blood_group)
               .length > 0 ? (
-              requests.map((request) => (
+              requests
+              .filter((request) => request.blood_group === currentDonor.blood_group)
+              .map((request) => (
               <div
                 key={request.id}
                 className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-600"

@@ -23,6 +23,11 @@ class ActivityLogListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         if not self.request.user.is_superuser and not self.request.user.role == 'ADMIN':
+            if self.request.activity_log == 'ALL':
+                return ActivityLog.objects.all().order_by('-created_at')
+            elif self.request.activity_log == 'USER_USER_LOGOUTS' or self.request.activity_log == 'USER_LOGOUTS':
+                return ActivityLog.objects.filter(user=self.request.user).order_by('-created_at')
+
             return ActivityLog.objects.filter(user=self.request.user).order_by('-created_at')
         return ActivityLog.objects.all().order_by('-created_at')
 
