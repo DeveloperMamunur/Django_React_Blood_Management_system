@@ -7,6 +7,12 @@ from .serializers import (
     DonationStatisticsSerializer, ActivityLogSerializer,
     BloodRequestViewSerializer, RequestViewStatisticsSerializer
 )
+from django.db.models import Count, Q
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models.functions import TruncDate
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 
 class DonationStatisticsListCreateView(generics.ListCreateAPIView):
@@ -32,10 +38,35 @@ class ActivityLogListCreateView(generics.ListCreateAPIView):
         return ActivityLog.objects.all().order_by('-created_at')
 
 
-class BloodRequestViewListCreateView(generics.ListCreateAPIView):
-    queryset = BloodRequestView.objects.all()
-    serializer_class = BloodRequestViewSerializer
+class BloodRequestViewListCreateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        seven_days_ago = timezone.now() - timedelta(days=7)
+        
+        daily_stats = (
+            BloodRequestView.objects
+            .filter(viewed_at__gte=seven_days_ago)
+            .annotate(date=TruncDate('viewed_at'))
+            .values('date')
+            .annotate(
+                total_views=Count('id'),
+                unique_viewers=Count('viewer', distinct=True) + 
+                              Count('session_key', distinct=True, filter=Q(viewer__isnull=True))
+            )
+            .order_by('date')
+        )
+        
+        results = [
+            {
+                'date': stat['date'].strftime('%Y-%m-%d'),
+                'total_views': stat['total_views'],
+                'unique_viewers': stat['unique_viewers']
+            }
+            for stat in daily_stats
+        ]
+        
+        return Response({'results': results})
 
 
 class RequestViewStatisticsListCreateView(generics.ListCreateAPIView):
@@ -44,6 +75,12 @@ class RequestViewStatisticsListCreateView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        if not self.request.user.is_superuser and not self.request.user.role == 'ADMIN':
-            return RequestViewStatistics.objects.filter(user=self.request.user).order_by('-created_at')
-        return RequestViewStatistics.objects.all().order_by('-created_at')
+        seven_days_ago = timezone.now().date() - timedelta(days=7)
+        
+        queryset = RequestViewStatistics.objects.filter(
+            date__gte=seven_days_ago
+        ).order_by('-date')
+        
+        if not self.request.user.is_superuser and self.request.user.role != 'ADMIN':
+            pass
+        return queryset

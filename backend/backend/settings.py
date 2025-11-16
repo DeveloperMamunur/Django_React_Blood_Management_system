@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'accounts',
     'common',
-    'donors',
+    'donors.apps.DonorsConfig',
     'bloodbanks',
     'campaigns',
     'notifications',

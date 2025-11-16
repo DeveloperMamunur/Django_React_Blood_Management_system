@@ -140,7 +140,9 @@ export default function HospitalModal({ hospitalId, isOpen, onClose }) {
                     Verified
                   </td>
                   <td className="p-3 text-gray-700 dark:text-gray-300">
-                    {hospital.is_verified === true ? "Yes" : "No"}
+                    <span className="text-green-600 me-1">{hospital?.verified_at || "—"} </span>
+                     by
+                    <span className="text-blue-600 ms-1">{hospital?.verified_by?.username || "—"}</span>
                   </td>
                 </tr>
                 <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/70">

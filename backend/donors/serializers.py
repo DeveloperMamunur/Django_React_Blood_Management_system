@@ -13,6 +13,8 @@ class DonorProfileSerializer(serializers.ModelSerializer):
     donation_points = serializers.IntegerField(read_only=True)
     can_donate = serializers.SerializerMethodField()
     days_until_eligible = serializers.SerializerMethodField()
+    full_name = serializers.SerializerMethodField(read_only=True)
+    verified_by = UserSerializer(read_only=True)
 
     class Meta:
         model = DonorProfile
@@ -24,6 +26,9 @@ class DonorProfileSerializer(serializers.ModelSerializer):
         
     def get_days_until_eligible(self, obj):
         return obj.days_until_eligible()
+
+    def get_full_name(self, obj):
+        return obj.full_name()
 
     def create(self, validated_data):
         request = self.context.get('request')
@@ -77,16 +82,23 @@ class DonorProfileSerializer(serializers.ModelSerializer):
 
 
 class DonationRecordSerializer(serializers.ModelSerializer):
-    donor = DonorProfileSerializer(required=False)
-    collected_by = UserSerializer(required=False, allow_null=True)
+    donor = DonorProfileSerializer(read_only=True)
+    collected_by = UserSerializer(read_only=True)
 
     class Meta:
         model = DonationRecord
         fields = '__all__'
-        read_only_fields = ['donor', 'collected_by']
 
     def create(self, validated_data):
-        collected_by = self.context['request'].user if self.context['request'].user.is_authenticated else None
-        validated_data['collected_by'] = collected_by
+        user = self.context['request'].user
+        if user.role == "DONOR":
+            validated_data['donor'] = user.donor_profile
+            validated_data['collected_by'] = None
+        else:
+            validated_data['collected_by'] = user
         return super().create(validated_data)
 
+    def update(self, instance, validated_data):
+        validated_data.pop('donor', None)
+        validated_data.pop('collected_by', None)
+        return super().update(instance, validated_data)

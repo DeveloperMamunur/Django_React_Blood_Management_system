@@ -4,10 +4,12 @@ import { Loader2 } from "lucide-react";
 import { requestService } from "../../services/requestService";
 import { hospitalService } from "../../services/hospitalService";
 import { useAuth } from "../../hooks/useAuth";
+import { bloodBankService } from "../../services/bloodBankService";
 
 export default function CreateRequestModal({ isOpen, onClose, onSuccess}) {
   const { currentUser } = useAuth();
   const [hospitals, setHospitals] = useState([]);
+  const [bloodBanks, setBloodBanks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     requester_type: "",
@@ -35,6 +37,7 @@ export default function CreateRequestModal({ isOpen, onClose, onSuccess}) {
       postal_code: "",
       country: "Bangladesh",
     },
+    assigned_blood_bank: "",
   });
 
 
@@ -66,7 +69,16 @@ export default function CreateRequestModal({ isOpen, onClose, onSuccess}) {
         console.error("Failed to fetch hospitals", err);
       }
     };
+    const fetchBloodBank = async () => {
+      try {
+        const res = await bloodBankService.allBloodBanksList();
+        setBloodBanks(res.results || res);
+      } catch (error) {
+        console.error("Failed to fetch blood bank:", error);
+      }
+    };
     fetchHospitals();
+    fetchBloodBank();
   }, []);
 
   // When hospital is selected
@@ -122,7 +134,11 @@ export default function CreateRequestModal({ isOpen, onClose, onSuccess}) {
     e.preventDefault();
     setLoading(true);
     try {
-      const submitData = { ...formData };
+      const submitData = {
+          ...formData,
+          assigned_blood_bank_id: formData.assigned_blood_bank || null
+      };
+      delete submitData.assigned_blood_bank;
       if (formData.requester_type === "RECEIVER") {
         delete submitData.hospital;
       }
@@ -200,7 +216,7 @@ export default function CreateRequestModal({ isOpen, onClose, onSuccess}) {
                 {formData.requester_type === "HOSPITAL" ? "Select Your Hospital" : "Select Hospital (Optional)"}
               </label>
               <select
-                value={formData.hospital}
+                value={formData.requester_type === "HOSPITAL" ? formData.hospital : ""}
                 onChange={(e) => handleHospitalSelect(e.target.value)}
                 className="w-full mt-1 p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
               >
@@ -293,7 +309,7 @@ export default function CreateRequestModal({ isOpen, onClose, onSuccess}) {
                     onChange={handleLocationChange}
                     className={`w-full mt-1 p-2 border rounded-md dark:border-gray-600 dark:text-gray-200 
                       ${formData.hospital ? 'bg-gray-100 dark:bg-gray-700' : 'dark:bg-gray-800'}`}
-                    readOnly={!!formData.hospital}
+                    readOnly={formData.requester_type === "HOSPITAL" && !!formData.hospital}
                     required
                   />
                 </div>
@@ -386,18 +402,37 @@ export default function CreateRequestModal({ isOpen, onClose, onSuccess}) {
               </select>
             </div>
           </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* Required By Date */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Required By Date</label>
-            <input
-              type="datetime-local"
-              name="required_by_date"
-              value={formData.required_by_date}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 dark:scheme-dark"
-              required
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Required By Date</label>
+              <input
+                type="datetime-local"
+                name="required_by_date"
+                value={formData.required_by_date}
+                onChange={handleChange}
+                className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 dark:scheme-dark"
+                required
+              />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Assigned Blood Bank</label>
+                <select
+                    name="assigned_blood_bank"
+                    value={formData.assigned_blood_bank}
+                    onChange={(e) =>
+                      setFormData({ ...formData, assigned_blood_bank: e.target.value })
+                    }
+                    className="w-full p-2 border rounded-md"
+                  >
+                    <option value="">Select Blood Bank</option>
+                    {bloodBanks.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.name}
+                      </option>
+                    ))}
+                  </select>
+              </div>
           </div>
 
           {/* Submit */}

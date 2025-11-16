@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, Route } from 'react-router-dom';
-import { Calendar, MapPin, CheckCircle, ExternalLink, Clock, XCircle, UserPlus, Droplet, AlertCircle, Phone, Navigation, Gauge, RouteIcon, Ruler} from 'lucide-react';
+import { Calendar, MapPin, CheckCircle, ExternalLink, Clock, XCircle, UserPlus, Droplet, AlertCircle, Phone, Navigation, Gauge, RouteIcon, Ruler, Eye} from 'lucide-react';
 import { useAuth } from '../../../hooks/useAuth';
 import { donorService } from '../../../services/donorService';
 import { requestService } from '../../../services/requestService';
+import ViewRequestModal from '../../../components/modals/ViewRequestModal';
 
 export default function DonorRequest() {
   const { currentUser } = useAuth();
@@ -11,6 +12,8 @@ export default function DonorRequest() {
   const [error, setError] = useState(null);
   const [currentDonor, setCurrentDonor] = useState(null);
   const [requests, setRequests] = useState([]);
+  const [selectedRequestId, setSelectedRequestId] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     if (currentUser.role === 'DONOR') {
@@ -60,8 +63,6 @@ export default function DonorRequest() {
       try {
         await requestService.updateRequest(requestId, {
           status: 'APPROVED',
-          approved_at: new Date().toISOString(),
-          approved_by: currentDonor.id
         });
         alert('Request approved successfully! The hospital will contact you soon.');
         fetchRequests();
@@ -85,6 +86,16 @@ export default function DonorRequest() {
         alert('Failed to cancel approval. Please try again.');
       }
     }
+  };
+
+  const handleViewRequest = (id) => {
+    setSelectedRequestId(id);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedRequestId(null);
   };
 
   const getStatusColor = (status) => {
@@ -373,41 +384,43 @@ export default function DonorRequest() {
                     {/* Action Buttons */}
                     <div className="flex flex-col sm:flex-row gap-3">
                       {request.status === 'PENDING' ? (
-                        <>
-                          <button
-                            onClick={() => handleApproveRequest(request.id)}
-                            className="flex-1 px-6 py-4 bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl font-bold text-lg flex items-center justify-center gap-3 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
-                          >
-                            <CheckCircle size={24} />
-                            Approve & Donate
-                          </button>
-                          <button
-                            className="flex-1 sm:flex-none px-6 py-4 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transition-all duration-300"
-                          >
-                            <Phone size={20} />
-                            Contact Hospital
-                          </button>
-                        </>
-                      ) : request.status === 'APPROVED' && request.approved_by.id === currentUser.id ? (
-                        <>
-                          <div className="flex-1 px-6 py-4 bg-linear-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 border-2 border-green-500 dark:border-green-600 text-green-700 dark:text-green-400 rounded-xl font-bold text-center flex items-center justify-center gap-2">
-                            <CheckCircle size={20} />
-                            You Approved This Request
-                          </div>
-                          <button
-                            onClick={() => handleCancelApproval(request.id)}
-                            className="flex-1 sm:flex-none px-6 py-4 bg-linear-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white rounded-xl font-bold flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transition-all duration-300"
-                          >
-                            <XCircle size={20} />
-                            Cancel Approval
-                          </button>
-                        </>
-                      ) : (
-                        <div className="flex-1 px-6 py-4 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-xl font-bold text-center flex items-center justify-center gap-2">
+                      <>
+                        <button
+                          onClick={() => handleApproveRequest(request.id)}
+                          className="flex-1 px-6 py-4 bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl font-bold text-lg flex items-center justify-center gap-3 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+                        >
+                          <CheckCircle size={24} />
+                          Approve & Donate
+                        </button>
+                      </>
+                    ) : (request.status === 'APPROVED' && request.approved_by.id === currentUser.id) ? (
+                      <>
+                        <div className="flex-1 px-6 py-4 bg-linear-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 border-2 border-green-500 dark:border-green-600 text-green-700 dark:text-green-400 rounded-xl font-bold text-center flex items-center justify-center gap-2">
                           <CheckCircle size={20} />
-                          {request.status === 'APPROVED' ? 'Approved by Another Donor' : request.status}
+                          You Approved This Request
                         </div>
-                      )}
+                        <button
+                          onClick={() => handleCancelApproval(request.id)}
+                          className="flex-1 sm:flex-none px-6 py-4 bg-linear-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white rounded-xl font-bold flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transition-all duration-300"
+                        >
+                          <XCircle size={20} />
+                          Cancel Approval
+                        </button>
+                      </>
+                    ) : (
+                      <div className="flex-1 px-6 py-4 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-xl font-bold text-center flex items-center justify-center gap-2">
+                        <CheckCircle size={20} />
+                        {request.status === 'APPROVED' ? 'Approved by Another Donor' : request.status}
+                      </div>
+                    )}
+                    
+                    <button
+                      onClick={() => handleViewRequest(request.id)}
+                      className="flex-1 sm:flex-none px-6 py-4 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
+                      <Eye size={20} />
+                      View Details
+                    </button>
                     </div>
                   </div>
                 </div>
@@ -427,6 +440,12 @@ export default function DonorRequest() {
             )}
           </div>
       </div>
+      <ViewRequestModal
+        isOpen={modalOpen}
+        onClose={closeModal}
+        requestId={selectedRequestId}
+        onStatusChange={fetchRequests}
+      />
     </div>
   );
 }

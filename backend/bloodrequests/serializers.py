@@ -11,6 +11,9 @@ from locations.models import Location
 class BloodRequestSerializer(serializers.ModelSerializer):
     requested_by = UserSerializer(read_only=True)
     approved_by = UserSerializer(read_only=True)
+    rejected_by = UserSerializer(read_only=True)
+    cancelled_by = UserSerializer(read_only=True)
+    fulfilled_by = UserSerializer(read_only=True)
     hospital = HospitalProfileSerializer(read_only=True)
     assigned_blood_bank = BloodBankSerializer(read_only=True)
     location = LocationSerializer(required=False, allow_null=True)

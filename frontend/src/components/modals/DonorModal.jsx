@@ -197,8 +197,8 @@ export default function DonorModal({ donorId, isOpen, onClose }) {
                   <td className="p-3 text-gray-700 dark:text-gray-300">
                     {donor.is_verified && (
                       <div>
-                        <span className="text-green-500">{donor.verified_at}</span>
-                        <span className="text-green-500">By {donor.verified_by}</span> 
+                        <span className="text-green-500 me-1">{donor.verified_at}</span>
+                        <span className="text-green-500">By {donor.verified_by.username}</span> 
                       </div>
                     )}
                     {!donor.is_verified && (

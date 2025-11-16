@@ -43,7 +43,6 @@ export const donorService = {
       throw error;
     }
   },
-
   async getDonorRecords() {
     try {
       const response = await api.get("/donors/records/");
@@ -61,6 +60,33 @@ export const donorService = {
     } catch (error) {
       console.error("Error fetching donor record:", error);
       return null;
+    }
+  },
+  async createDonorRecord(data) {
+    try {
+      const response = await api.post("/donors/records/", data);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating donor record:", error);
+      throw error;
+    }
+  },
+  async updateDonorRecord(id, data) {
+    try {
+      const response = await api.put(`/donors/records/${id}/`, data);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating donor record:", error);
+      throw error;
+    }
+  },
+  async deleteDonorRecord(id) {
+    try {
+      const response = await api.delete(`/donors/records/${id}/`);
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting donor record:", error);
+      throw error;
     }
   },
   async currentDonor() {

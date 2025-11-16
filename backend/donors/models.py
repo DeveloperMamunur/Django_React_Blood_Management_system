@@ -72,6 +72,9 @@ class DonorProfile(models.Model):
     
     def __str__(self):
         return f"{self.user.get_full_name()} - {self.blood_group}"
+
+    def full_name(self):
+        return f"{self.user.first_name} {self.user.last_name}"
     
     def can_donate(self):
         if not self.last_donation_date:
@@ -96,7 +99,7 @@ class DonationRecord(models.Model):
     )
     donation_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     donor = models.ForeignKey(DonorProfile, on_delete=models.CASCADE, related_name='donations')
-    blood_bank = models.ForeignKey('bloodbanks.BloodBank', on_delete=models.CASCADE, related_name='donations')
+    blood_bank = models.ForeignKey('bloodbanks.BloodBank', on_delete=models.CASCADE, null=True, blank=True, related_name='donations')
     donation_date = models.DateTimeField()
     blood_group = models.CharField(max_length=3, choices=DonorProfile.BLOOD_GROUP_CHOICES)
     units_donated = models.DecimalField(max_digits=4, decimal_places=2, default=1.0, help_text="Units in pints")

@@ -106,29 +106,43 @@ class RequestViewStatistics(models.Model):
     @classmethod
     def generate_daily_stats(cls):
         today = timezone.now().date()
-        start = timezone.make_aware(timezone.datetime.combine(today, timezone.datetime.min.time()))
-        end = timezone.make_aware(timezone.datetime.combine(today, timezone.datetime.max.time()))
+        start = timezone.make_aware(
+            timezone.datetime.combine(today, timezone.datetime.min.time())
+        )
+        end = timezone.make_aware(
+            timezone.datetime.combine(today, timezone.datetime.max.time())
+        )
         total_views = BloodRequestView.objects.filter(viewed_at__range=(start, end)).count()
         top_requests_qs = (
             BloodRequestView.objects.filter(viewed_at__range=(start, end))
-            .values('blood_request__id', 'blood_request__request_id', 'blood_request__patient_name')
+            .values(
+                'blood_request__id',
+                'blood_request__request_id',
+                'blood_request__patient_name',
+                'blood_request__blood_group',
+                'blood_request__units_required',
+            )
             .annotate(view_count=Count('id'))
             .order_by('-view_count')[:5]
         )
 
-        top_requests = [
-            {
-                "id": r["blood_request__id"],
-                "request_id": r["blood_request__request_id"],
-                "patient_name": r["blood_request__patient_name"],
-                "views": r["view_count"],
-            }
-            for r in top_requests_qs
-        ]
+        top_requests = []
+        for r in top_requests_qs:
+            top_requests.append({
+                "id": str(r["blood_request__id"]),
+                "request_id": str(r["blood_request__request_id"]),
+                "patient_name": str(r["blood_request__patient_name"]),
+                "blood_group": str(r["blood_request__blood_group"]),
+                "units_required": int(r["blood_request__units_required"]),
+                "views": r["view_count"]
+            })
 
         obj, _ = cls.objects.update_or_create(
             date=today,
-            defaults={"total_views": total_views, "top_requests": top_requests},
+            defaults={
+                "total_views": total_views,
+                "top_requests": top_requests
+            },
         )
         return obj
 

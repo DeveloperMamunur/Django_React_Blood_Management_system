@@ -83,6 +83,7 @@ export default function HospitalPage() {
                 <th className="p-3 text-left font-semibold border-b border-gray-300 dark:border-gray-700">Email</th>
                 <th className="p-3 text-left font-semibold border-b border-gray-300 dark:border-gray-700">Phone</th>
                 <th className="p-3 text-left font-semibold border-b border-gray-300 dark:border-gray-700">Address</th>
+                <th className="p-3 text-left font-semibold border-b border-gray-300 dark:border-gray-700">Status</th>
                 <th className="p-3 text-left font-semibold border-b border-gray-300 dark:border-gray-700">Action</th>
               </tr>
             </thead>

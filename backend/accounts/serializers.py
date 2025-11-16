@@ -287,6 +287,7 @@ class ReceiverProfileSerializer(serializers.ModelSerializer):
 class HospitalProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     location = LocationSerializer(required=False, allow_null=True)
+    verified_by = UserSerializer(read_only=True)
 
     class Meta:
         model = HospitalProfile

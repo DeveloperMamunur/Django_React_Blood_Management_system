@@ -50,6 +50,15 @@ export const requestService = {
         } catch (error) {
             console.log(error);
         }
+    },
+    async requestView(id) {
+        try {
+            const response = await api.post(`/requests/${id}/view/`);
+            console.log(response.data);
+            return response.data;    
+        } catch (error) {
+            console.log(error);
+        }
     }
 
 }

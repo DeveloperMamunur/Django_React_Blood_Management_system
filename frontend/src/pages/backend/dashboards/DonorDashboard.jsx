@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { Link} from 'react-router-dom';
-import { Calendar, MapPin, CheckCircle, ExternalLink, Clock, XCircle, UserPlus, Droplet, AlertCircle, Phone, Navigation, Gauge, RouteIcon, Ruler, HeartPulse, Heart, Pointer, PercentCircle} from 'lucide-react';
+import { Calendar, MapPin, CheckCircle, ExternalLink, Clock, XCircle, UserPlus, Droplet, AlertCircle, Phone, Navigation, Gauge, RouteIcon, Ruler, HeartPulse, Heart, Pointer, PercentCircle, Eye} from 'lucide-react';
 import { campaignService } from '../../../services/campaignService';
 import { useAuth } from '../../../hooks/useAuth';
 import { donorService } from '../../../services/donorService';
 import { requestService } from '../../../services/requestService';
 import { DonorEligibilityCard } from '../../../components/common/DonorEligibilityCard';
+import ViewRequestModal from '../../../components/modals/ViewRequestModal';
 
 export default function DonorDashboard() {
   const { currentUser } = useAuth();
@@ -16,6 +17,8 @@ export default function DonorDashboard() {
   const [currentDonor, setCurrentDonor] = useState(null);
   const [requests, setRequests] = useState([]);
   const [allRequests, setAllRequests] = useState([]);
+  const [selectedRequestId, setSelectedRequestId] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,29 +65,29 @@ export default function DonorDashboard() {
     }
   }, [currentUser]);
 
+  const fetchRequests = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await requestService.getAllRequests();
+      const allReq = res.results || res || [];
+      console.log("fetch all request", allReq);
+      setAllRequests(allReq);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setError("Failed to load requests. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchRequests = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const res = await requestService.getAllRequests();
-        const allReq = res.results || res || [];
-        console.log("fetch all request", allReq);
-        
-        setAllRequests(allReq);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setError("Failed to load requests. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchRequests();
   }, []);
 
   useEffect(() => {
-    setRequests(allRequests.slice(0, 3));
-  }, [allRequests]);
+    setRequests(allRequests.filter(request => request.blood_group === currentDonor?.blood_group).slice(0, 3));
+  }, [allRequests, currentDonor]);
 
   const handleApproveRequest = async (requestId) => {
     if (window.confirm('Are you sure you want to approve this blood donation request?')) {
@@ -93,6 +96,7 @@ export default function DonorDashboard() {
           status: 'APPROVED'
         });
         alert('Request approved successfully! The hospital will contact you soon.');
+        fetchRequests();
       } catch (error) {
         console.error('Error approving request:', error);
         alert('Failed to approve request. Please try again.');
@@ -107,11 +111,23 @@ export default function DonorDashboard() {
           status: 'PENDING'
         });
         alert('Approval cancelled successfully.');
+        fetchRequests();
       } catch (error) {
         console.error('Error cancelling approval:', error);
         alert('Failed to cancel approval. Please try again.');
       }
     }
+  };
+
+
+  const handleViewRequest = (id) => {
+    setSelectedRequestId(id);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedRequestId(null);
   };
 
   const getProgressPercentage = (registered, max) => {
@@ -601,11 +617,9 @@ export default function DonorDashboard() {
         </div>
         <div className="space-y-6">
           {requests
-              .filter((request) => request.blood_group === currentDonor.blood_group)
-              .length > 0 ? (
+              ?.length > 0 ? (
               requests
-              .filter((request) => request.blood_group === currentDonor.blood_group)
-              .map((request) => (
+              ?.map((request) => (
               <div
                 key={request.id}
                 className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-gray-700 hover:border-red-300 dark:hover:border-red-600"
@@ -760,14 +774,8 @@ export default function DonorDashboard() {
                           <CheckCircle size={24} />
                           Approve & Donate
                         </button>
-                        <button
-                          className="flex-1 sm:flex-none px-6 py-4 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transition-all duration-300"
-                        >
-                          <Phone size={20} />
-                          Contact Hospital
-                        </button>
                       </>
-                    ) : request.status === 'APPROVED' && request.approved_by.id === currentUser.id ? (
+                    ) : (request.status === 'APPROVED' && request.approved_by.id === currentUser.id) ? (
                       <>
                         <div className="flex-1 px-6 py-4 bg-linear-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 border-2 border-green-500 dark:border-green-600 text-green-700 dark:text-green-400 rounded-xl font-bold text-center flex items-center justify-center gap-2">
                           <CheckCircle size={20} />
@@ -787,6 +795,14 @@ export default function DonorDashboard() {
                         {request.status === 'APPROVED' ? 'Approved by Another Donor' : request.status}
                       </div>
                     )}
+                    
+                    <button
+                      onClick={() => handleViewRequest(request.id)}
+                      className="flex-1 sm:flex-none px-6 py-4 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
+                      <Eye size={20} />
+                      View Details
+                    </button>
                   </div>
                 </div>
               </div>
@@ -806,6 +822,12 @@ export default function DonorDashboard() {
           )}
         </div>
       </div>
+      <ViewRequestModal
+        isOpen={modalOpen}
+        onClose={closeModal}
+        requestId={selectedRequestId}
+        onStatusChange={fetchRequests}
+      />
     </div>
   );
 }

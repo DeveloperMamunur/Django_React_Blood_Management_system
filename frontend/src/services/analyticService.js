@@ -1,7 +1,7 @@
 import api from "./api";
 
 export const analyticService = {
-    async getAllStats() {
+    async getDonationStats() {
         try {
             const response = await api.get("/analytics/donation-stats/");
             console.log(response.data);
@@ -25,6 +25,16 @@ export const analyticService = {
         } catch (error) {
             console.log(error);
         }
+    },
+    async getRequestStates() {
+        try {
+            const response = await api.get("/analytics/request-views/");
+            console.log(response.data);
+            
+            return response.data;    
+        } catch (error) {
+            console.log(error);
+        }   
     },
     async getRequestViewStats() {
         try {

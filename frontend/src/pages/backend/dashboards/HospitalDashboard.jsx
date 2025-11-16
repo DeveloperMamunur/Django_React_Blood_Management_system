@@ -261,7 +261,7 @@ export default function HospitalDashboard() {
         {requests && requests.length > 0 ? (
           <div className="space-y-5">
             {requests
-              .slice(0, 3)
+              ?.slice(0, 3)
               .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
               .map((request) => (
               <div
@@ -433,6 +433,7 @@ export default function HospitalDashboard() {
                     </div>
                   </div>
                 </div>
+                {request.approved_by && (
                 <div className="border-t border-gray-200 dark:border-gray-700/50">
                   <div className="flex flex-col md:flex-row gap-4 justify-between px-5 py-3">
                     <div className="flex flex-row items-center gap-2">
@@ -441,7 +442,7 @@ export default function HospitalDashboard() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                          Approved_by: {request.approved_by?.first_name ? request.approved_by.first_name+' '+request.approved_by.last_name : request.approved_by.username}
+                          Approved_by: {request.approved_by?.first_name ? request?.approved_by?.first_name+' '+request?.approved_by?.last_name : request?.approved_by?.username}
                         </p>
                         <p className="text-sm font-semibold text-gray-900 dark:text-white">
                           {request.approved_at ? new Date(request.approved_at).toLocaleString() : 'Not Approved'}
@@ -454,10 +455,7 @@ export default function HospitalDashboard() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                          {request.approved_by?.location?.address_line1}, {request.approved_by?.location?.police_station}, {request.approved_by?.location?.postal_code}
-                        </p>
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                          {request.approved_by?.location?.city}, {request.approved_by?.location?.country}
+                          {request?.approved_by?.location?.city}, {request?.approved_by?.location?.country}
                         </p>
                       </div>
                     </div>
@@ -480,6 +478,7 @@ export default function HospitalDashboard() {
                     </div>
                   </div>
                 </div>
+                )}
               </div>
             ))}
             <div className="flex justify-center mt-8">

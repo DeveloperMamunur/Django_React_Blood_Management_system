@@ -107,6 +107,21 @@ class DonationRecordListCreateView(generics.ListCreateAPIView):
     serializer_class = DonationRecordSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser or user.role == 'ADMIN':
+            return DonationRecord.objects.all().order_by('-id')
+        elif user.role == 'BLOOD_BANK':
+            try:
+                blood_bank = user.bloodbank
+            except Exception:
+                return DonationRecord.objects.none()
+
+            return DonationRecord.objects.filter(
+                blood_bank=blood_bank
+            ).order_by('-id')
+        return DonationRecord.objects.none()
+
 
 class DonationRecordDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = DonationRecord.objects.all()

@@ -46,6 +46,7 @@ class BloodBankSerializer(serializers.ModelSerializer):
     managed_by = UserSerializer(read_only=True)
     inventory = serializers.SerializerMethodField(read_only=True)
     city_country = serializers.SerializerMethodField(read_only=True)
+    verified_by = UserSerializer(read_only=True)
 
     class Meta:
         model = BloodBank
